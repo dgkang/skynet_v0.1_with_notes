@@ -15,6 +15,7 @@
 
 //http://blog.chinaunix.net/uid-11449555-id-2873961.html
 //http://blog.csdn.net/gogofly_lee/article/details/2051669
+//http://www.cnblogs.com/leaven/archive/2010/08/19/1803382.html
 
 // skynet 定时器的实现为linux内核的标准做法  精度为 0.01s 对游戏一般来说够了 高精度的定时器很费CPU
 
@@ -27,11 +28,15 @@ typedef void (*timer_execute_func)(void *ud,void *arg);
 // 因此在将它们以松散定时器向量进行组织时也应该区别对待。通常，定时器的interval值越小，
 // 它所处的定时器向量的松散度也就越低（也即向量中的各定时器的expires值相差越小）；而interval值越大，
 // 它所处的定时器向量的松散度也就越大（也即向量中的各定时器的expires值相差越大）。
+// 所谓“松散的定时器向量语义”就是指：各定时器的expires值可以互不相同的一个定时器队列。
 
 // 内核规定，对于那些满足条件：0x100≤interval≤0x3fff的定时器，
 // 只要表达式（interval>>8）具有相同值的定时器都将被组织在同一个松散定时器向量中，
 // 即以1》8＝256为一个基本单位。因此，为组织所有满足条件0x100≤interval≤0x3fff的定时器，
 // 就需要2^6＝64个松散定时器向量。同样地，为方便起见，这64个松散定时器向量也放在一起形成数组，并作为数据结构timer_vec的一部分。
+// 同理对于0x4000≤interval≤0xfffff、0x100000≤interval≤0x3ffffff、0x4000000≤interval≤0xffffffff 区间，
+//只要表达式（interval>>8＋6）、（interval>>8＋6 +6）、（interval>>8＋6+6+6）的值相同则被放在同义个松散定时器中
+//器都将被放在同一个松散定时器向量中,故link_list t 为t[4],TIME_LEVEL_SHIFT 为 6
 
 #define TIME_NEAR_SHIFT 8
 #define TIME_NEAR (1 << TIME_NEAR_SHIFT)   // 2^8 = 256
