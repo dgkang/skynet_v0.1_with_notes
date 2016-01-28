@@ -1,4 +1,4 @@
-﻿#include "skynet_env.h"
+#include "skynet_env.h"
 
 #include <lua.h>
 #include <lauxlib.h>
