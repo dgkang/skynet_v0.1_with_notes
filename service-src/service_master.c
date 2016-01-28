@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_harbor.h"
 #include "skynet_socket.h"
 
@@ -10,32 +10,32 @@
 #include <stdint.h>
 
 
-// Harbor ¼äÍ¨¹ıµ¥ÏòµÄ tcp Á¬½Ó¹ÜµÀ´«ÊäÊı¾İ£¬Íê³É²»Í¬µÄ skynet ½Úµã¼äµÄÊı¾İ½»»»¡£
-// skynet Ä¿Ç°Ö§³ÖÒ»¸öÈ«¾ÖÃû×Ö·şÎñ£¬¿ÉÒÔ°ÑÒ»¸öÏûÏ¢°ü·¢ËÍµ½ÌØ¶¨Ãû×ÖµÄ·şÎñÉÏ¡£Õâ¸ö·şÎñ²»±Ø´æÔÚÓÚµ±Ç° skynet ½ÚµãÖĞ¡£ÕâÑù£¬ÎÒÃÇ¾ÍĞèÒªÒ»¸ö»ú¹¹ÄÜ¹»Í¬²½ÕâĞ©È«¾ÖÃû×Ö¡£
-// Îª´Ë£¬ÎÒÊµÏÖÁËÒ»¸ö½Ğ×ö master µÄ·şÎñ¡£ËüµÄ×÷ÓÃ¾ÍÊÇ¹ã²¥Í¬²½ËùÓĞµÄÈ«¾ÖÃû×Ö£¬ÒÔ¼°¼ÓÈë½øÀ´µÄ skynet ½ÚµãµÄµØÖ·¡£±¾ÖÊÉÏ£¬ÕâĞ©µØÖ·Ò²ÊÇÒ»ÖÖÃû×Ö¡£
-// Í¬Ñù¿ÉÒÔÓÃ key-value µÄĞÎÊ½´¢´æ¡£¼´£¬Ã¿¸ö skynet ½ÚµãºÅ¶ÔÓ¦Ò»¸ö×Ö·û´®µÄµØÖ·¡£
+// Harbor é—´é€šè¿‡å•å‘çš„ tcp è¿æ¥ç®¡é“ä¼ è¾“æ•°æ®ï¼Œå®Œæˆä¸åŒçš„ skynet èŠ‚ç‚¹é—´çš„æ•°æ®äº¤æ¢ã€‚
+// skynet ç›®å‰æ”¯æŒä¸€ä¸ªå…¨å±€åå­—æœåŠ¡ï¼Œå¯ä»¥æŠŠä¸€ä¸ªæ¶ˆæ¯åŒ…å‘é€åˆ°ç‰¹å®šåå­—çš„æœåŠ¡ä¸Šã€‚è¿™ä¸ªæœåŠ¡ä¸å¿…å­˜åœ¨äºå½“å‰ skynet èŠ‚ç‚¹ä¸­ã€‚è¿™æ ·ï¼Œæˆ‘ä»¬å°±éœ€è¦ä¸€ä¸ªæœºæ„èƒ½å¤ŸåŒæ­¥è¿™äº›å…¨å±€åå­—ã€‚
+// ä¸ºæ­¤ï¼Œæˆ‘å®ç°äº†ä¸€ä¸ªå«åš master çš„æœåŠ¡ã€‚å®ƒçš„ä½œç”¨å°±æ˜¯å¹¿æ’­åŒæ­¥æ‰€æœ‰çš„å…¨å±€åå­—ï¼Œä»¥åŠåŠ å…¥è¿›æ¥çš„ skynet èŠ‚ç‚¹çš„åœ°å€ã€‚æœ¬è´¨ä¸Šï¼Œè¿™äº›åœ°å€ä¹Ÿæ˜¯ä¸€ç§åå­—ã€‚
+// åŒæ ·å¯ä»¥ç”¨ key-value çš„å½¢å¼å‚¨å­˜ã€‚å³ï¼Œæ¯ä¸ª skynet èŠ‚ç‚¹å·å¯¹åº”ä¸€ä¸ªå­—ç¬¦ä¸²çš„åœ°å€ã€‚
 
-// skynetµÄ master·şÎñ master·şÎñ±£´æÁËkey-value key¾ÍÊÇskynetµÄhandle value¾Íhandle¶ÔÓ¦µÄ·şÎñ
-// matserÓÃÓÚskynet²»Í¬½Úµã¼äµÄÍ¬²½
+// skynetçš„ masteræœåŠ¡ masteræœåŠ¡ä¿å­˜äº†key-value keyå°±æ˜¯skynetçš„handle valueå°±handleå¯¹åº”çš„æœåŠ¡
+// matserç”¨äºskynetä¸åŒèŠ‚ç‚¹é—´çš„åŒæ­¥
 
-// ÎÒÉè¼ÆÁËÒ»Ì¨ master ÖĞĞÄ·şÎñÆ÷ÓÃÀ´Í¬²½»úÆ÷ĞÅÏ¢¡£°ÑÃ¿¸ö skynet ½ø³ÌÉÏÓÃÓÚºÍÆäËû»úÆ÷Í¨Ñ¶µÄ²¿¼ş³ÆÎª Harbor ¡£
-// Ã¿¸ö skynet ½ø³ÌÓĞÒ»¸ö harbor id Îª 1 µ½ 255 £¨±£Áô 0 ¸øÏµÍ³ÄÚ²¿ÓÃ£©¡£ÔÚÃ¿¸ö skynet ½ø³ÌÆô¶¯Ê±£¬
-// Ïò master »úÆ÷»ã±¨×Ô¼ºµÄ harbor id ¡£Ò»µ©³åÍ»£¬Ôò½ûÖ¹Á¬Èë¡£
+// æˆ‘è®¾è®¡äº†ä¸€å° master ä¸­å¿ƒæœåŠ¡å™¨ç”¨æ¥åŒæ­¥æœºå™¨ä¿¡æ¯ã€‚æŠŠæ¯ä¸ª skynet è¿›ç¨‹ä¸Šç”¨äºå’Œå…¶ä»–æœºå™¨é€šè®¯çš„éƒ¨ä»¶ç§°ä¸º Harbor ã€‚
+// æ¯ä¸ª skynet è¿›ç¨‹æœ‰ä¸€ä¸ª harbor id ä¸º 1 åˆ° 255 ï¼ˆä¿ç•™ 0 ç»™ç³»ç»Ÿå†…éƒ¨ç”¨ï¼‰ã€‚åœ¨æ¯ä¸ª skynet è¿›ç¨‹å¯åŠ¨æ—¶ï¼Œ
+// å‘ master æœºå™¨æ±‡æŠ¥è‡ªå·±çš„ harbor id ã€‚ä¸€æ—¦å†²çªï¼Œåˆ™ç¦æ­¢è¿å…¥ã€‚
 
-// master ·şÎñÆäÊµ¾ÍÊÇÒ»¸ö¼òµ¥µÄÄÚ´æ key-value Êı¾İ¿â¡£Êı×Ö key ¶ÔÓ¦µÄ value ÕıÊÇ harbor µÄÍ¨Ñ¶µØÖ·¡£
-// ÁíÍâ£¬Ö§³ÖÁËÓµÓĞÈ«¾ÖÃû×ÖµÄ·şÎñ£¬Ò²ÒÀ¿¿ master »úÆ÷Í¬²½¡£±ÈÈç£¬Äã¿ÉÒÔ´ÓÄ³Ì¨ skynet ½Úµã×¢²áÒ»¸ö½Ğ DATABASE
-// µÄ·şÎñ½Úµã£¬ËüÖ»Òª½« DATABASE ºÍ½Úµã id µÄ¶ÔÓ¦¹ØÏµÍ¨Öª master »úÆ÷£¬¾Í¿ÉÒÔÒÀ¿¿ master »úÆ÷Í¬²½¸øËùÓĞ×¢²áÈëÍøÂçµÄ skynet ½Úµã¡£
+// master æœåŠ¡å…¶å®å°±æ˜¯ä¸€ä¸ªç®€å•çš„å†…å­˜ key-value æ•°æ®åº“ã€‚æ•°å­— key å¯¹åº”çš„ value æ­£æ˜¯ harbor çš„é€šè®¯åœ°å€ã€‚
+// å¦å¤–ï¼Œæ”¯æŒäº†æ‹¥æœ‰å…¨å±€åå­—çš„æœåŠ¡ï¼Œä¹Ÿä¾é  master æœºå™¨åŒæ­¥ã€‚æ¯”å¦‚ï¼Œä½ å¯ä»¥ä»æŸå° skynet èŠ‚ç‚¹æ³¨å†Œä¸€ä¸ªå« DATABASE
+// çš„æœåŠ¡èŠ‚ç‚¹ï¼Œå®ƒåªè¦å°† DATABASE å’ŒèŠ‚ç‚¹ id çš„å¯¹åº”å…³ç³»é€šçŸ¥ master æœºå™¨ï¼Œå°±å¯ä»¥ä¾é  master æœºå™¨åŒæ­¥ç»™æ‰€æœ‰æ³¨å†Œå…¥ç½‘ç»œçš„ skynet èŠ‚ç‚¹ã€‚
 
-// master ×öµÄÊÂÇéºÜ¼òµ¥£¬ÆäÊµ¾ÍÊÇ»ØÓ¦Ãû×ÖµÄ²éÑ¯£¬ÒÔ¼°ÔÚ¸üĞÂÃû×Öºó£¬Í¬²½¸øÍøÂçÖĞËùÓĞµÄ»úÆ÷¡£
+// master åšçš„äº‹æƒ…å¾ˆç®€å•ï¼Œå…¶å®å°±æ˜¯å›åº”åå­—çš„æŸ¥è¯¢ï¼Œä»¥åŠåœ¨æ›´æ–°åå­—åï¼ŒåŒæ­¥ç»™ç½‘ç»œä¸­æ‰€æœ‰çš„æœºå™¨ã€‚
 
-// skynet ½Úµã£¬Í¨¹ı master £¬ÈÏÊ¶ÍøÂçÖĞËùÓĞÆäËü skynet ½Úµã¡£ËüÃÇÏà»¥Ò»Ò»½¨Á¢µ¥ÏòÍ¨Ñ¶Í¨µÀ¡£
-// Ò²¾ÍÊÇËµ£¬Èç¹ûÒ»¹²ÓĞ 100 ¸ö skynet ½Úµã£¬ÔÚËüÃÇÆô¶¯Íê±Ïºó£¬»á½¨Á¢Æğ 1 ÍòÌõÍ¨Ñ¶Í¨µÀ¡£
+// skynet èŠ‚ç‚¹ï¼Œé€šè¿‡ master ï¼Œè®¤è¯†ç½‘ç»œä¸­æ‰€æœ‰å…¶å®ƒ skynet èŠ‚ç‚¹ã€‚å®ƒä»¬ç›¸äº’ä¸€ä¸€å»ºç«‹å•å‘é€šè®¯é€šé“ã€‚
+// ä¹Ÿå°±æ˜¯è¯´ï¼Œå¦‚æœä¸€å…±æœ‰ 100 ä¸ª skynet èŠ‚ç‚¹ï¼Œåœ¨å®ƒä»¬å¯åŠ¨å®Œæ¯•åï¼Œä¼šå»ºç«‹èµ· 1 ä¸‡æ¡é€šè®¯é€šé“ã€‚
 
 // http://blog.codingnow.com/2012/08/skynet_harbor_rpc.html
 
 #define HASH_SIZE 4096
 
-// hash key-value±í
+// hash key-valueè¡¨
 struct name {
 	struct name * next;
 	char key[GLOBALNAME_LENGTH]; // GLOBALNAME_LENGTH: 16
@@ -50,13 +50,13 @@ struct namemap {
 
 struct master {
 	struct skynet_context *ctx;
-	int remote_fd[REMOTE_MAX];      // REMOTE_MAX: 256 Ä¬ÈÏÎª256¸ö½Úµã Ò²¿ÉÒÔ¸ü¸Ä Á¬½Óºó·µ»ØµÄÔ¶³Ìid ¼´¶ÔµÈ·½fd
-	bool connected[REMOTE_MAX];     // ÊÇ·ñ´¦ÓÚÁ¬½Ó×´Ì¬
-	char * remote_addr[REMOTE_MAX]; // ip:port±í Êµ¼ÊÉÏÎÒÃÇ°Ñ ip:portÓĞÊ±Ò²³ÆÎªÒ»¸ö¶Ëµã endpoint
+	int remote_fd[REMOTE_MAX];      // REMOTE_MAX: 256 é»˜è®¤ä¸º256ä¸ªèŠ‚ç‚¹ ä¹Ÿå¯ä»¥æ›´æ”¹ è¿æ¥åè¿”å›çš„è¿œç¨‹id å³å¯¹ç­‰æ–¹fd
+	bool connected[REMOTE_MAX];     // æ˜¯å¦å¤„äºè¿æ¥çŠ¶æ€
+	char * remote_addr[REMOTE_MAX]; // ip:portè¡¨ å®é™…ä¸Šæˆ‘ä»¬æŠŠ ip:portæœ‰æ—¶ä¹Ÿç§°ä¸ºä¸€ä¸ªç«¯ç‚¹ endpoint
 	struct namemap map;
 };
 
-// ×¢²áskynet·şÎñµÄ±ê×¼½Ó¿Ú
+// æ³¨å†ŒskynetæœåŠ¡çš„æ ‡å‡†æ¥å£
 struct master *
 master_create() {
 	struct master *m = malloc(sizeof(*m));
@@ -80,7 +80,7 @@ master_release(struct master * m) {
 		int fd = m->remote_fd[i];
 		if (fd >= 0) {
 			assert(ctx);
-			skynet_socket_close(ctx, fd); // ¹Ø±Õsocket fd
+			skynet_socket_close(ctx, fd); // å…³é—­socket fd
 		}
 		free(m->remote_addr[i]);
 	}
@@ -96,11 +96,11 @@ master_release(struct master * m) {
 	free(m);
 }
 
-// ÔÚmasterÖĞ²éÕÒÕâ¸öname¶ÔÓ¦µÄ±í½Úµã
+// åœ¨masterä¸­æŸ¥æ‰¾è¿™ä¸ªnameå¯¹åº”çš„è¡¨èŠ‚ç‚¹
 static struct name *
 _search_name(struct master *m, char name[GLOBALNAME_LENGTH]) {
 	uint32_t *ptr = (uint32_t *) name;
-	uint32_t h = ptr[0] ^ ptr[1] ^ ptr[2] ^ ptr[3]; // ¹şÏ£keyµÄ¼ÆËã
+	uint32_t h = ptr[0] ^ ptr[1] ^ ptr[2] ^ ptr[3]; // å“ˆå¸Œkeyçš„è®¡ç®—
 	struct name * node = m->map.node[h % HASH_SIZE];
 	while (node) {
 		if (node->hash == h && strncmp(node->key, name, GLOBALNAME_LENGTH) == 0) {
@@ -155,7 +155,7 @@ _connect_to(struct master *m, int id) {
 	m->remote_fd[id] = skynet_socket_connect(ctx, tmp, port); // socket connect return remote_fd[]
 }
 
-// ´óĞ¡¶Ë×Ö½ÚĞòµÄ×ª»»
+// å¤§å°ç«¯å­—èŠ‚åºçš„è½¬æ¢
 static inline void
 to_bigendian(uint8_t *buffer, uint32_t n) {
 	buffer[0] = (n >> 24) & 0xff;
@@ -164,13 +164,13 @@ to_bigendian(uint8_t *buffer, uint32_t n) {
 	buffer[3] = n & 0xff;
 }
 
-// ·¢ËÍÏûÏ¢
+// å‘é€æ¶ˆæ¯
 static void
 _send_to(struct master *m, int id, const void * buf, int sz, uint32_t handle) {
 	uint8_t * buffer= (uint8_t *)malloc(4 + sz + 12);
 	to_bigendian(buffer, sz+12);
 	memcpy(buffer+4, buf, sz);
-	to_bigendian(buffer+4+sz, 0); // ×ª×ª³É´ó¶Ë×Ö½ÚĞò ÍøÂçÊÇ´ó¶Ë×Ö½ÚĞò
+	to_bigendian(buffer+4+sz, 0); // è½¬è½¬æˆå¤§ç«¯å­—èŠ‚åº ç½‘ç»œæ˜¯å¤§ç«¯å­—èŠ‚åº
 	to_bigendian(buffer+4+sz+4, handle);
 	to_bigendian(buffer+4+sz+8, 0);
 
@@ -182,7 +182,7 @@ _send_to(struct master *m, int id, const void * buf, int sz, uint32_t handle) {
 	}
 }
 
-// ¹ã²¥
+// å¹¿æ’­
 static void
 _broadcast(struct master *m, const char *name, size_t sz, uint32_t handle) {
 	int i;
@@ -194,7 +194,7 @@ _broadcast(struct master *m, const char *name, size_t sz, uint32_t handle) {
 	}
 }
 
-// ÇëÇóname
+// è¯·æ±‚name
 static void
 _request_name(struct master *m, const char * buffer, size_t sz) {
 	char name[GLOBALNAME_LENGTH];
@@ -206,14 +206,14 @@ _request_name(struct master *m, const char * buffer, size_t sz) {
 	_broadcast(m, name, GLOBALNAME_LENGTH, n->value);
 }
 
-// Í¨ÖªËùÓĞ½Úµã
+// é€šçŸ¥æ‰€æœ‰èŠ‚ç‚¹
 static void
 _update_name(struct master *m, uint32_t handle, const char * buffer, size_t sz) {
 	char name[GLOBALNAME_LENGTH];
 	_copy_name(name, buffer, sz);
 	struct name * n = _search_name(m, name);
 	if (n==NULL) {
-		n = _insert_name(m,name); // Ã»ÓĞÕÒµ½Õâ¸ö name ÔÚmasterÖĞ²åÈëÕâ¸ö Name
+		n = _insert_name(m,name); // æ²¡æœ‰æ‰¾åˆ°è¿™ä¸ª name åœ¨masterä¸­æ’å…¥è¿™ä¸ª Name
 	}
 
 	n->value = handle;
@@ -230,10 +230,10 @@ close_harbor(struct master *m, int harbor_id) {
 	}
 }
 
-// ¸üĞÂÏÂµØÖ·
+// æ›´æ–°ä¸‹åœ°å€
 static void
 _update_address(struct master *m, int harbor_id, const char * buffer, size_t sz) {
-	if (m->remote_fd[harbor_id] >= 0) { // Õâ¸öremote_fd[harbor_id] ÓÃ¹ıÁË ÏÈÇå³ıÏÂ
+	if (m->remote_fd[harbor_id] >= 0) { // è¿™ä¸ªremote_fd[harbor_id] ç”¨è¿‡äº† å…ˆæ¸…é™¤ä¸‹
 		close_harbor(m, harbor_id);
 	}
 
@@ -300,15 +300,15 @@ dispatch_socket(struct master *m, const struct skynet_socket_message *msg, int s
 	n bytes string (name)
  */
 
-// Õâ¸öÄ£¿é¶ÔÓ¦µÄÖ÷Ñ­»·
+// è¿™ä¸ªæ¨¡å—å¯¹åº”çš„ä¸»å¾ªç¯
 static int
 _mainloop(struct skynet_context * context, void * ud, int type, int session, uint32_t source, const void * msg, size_t sz) {
-	if (type == PTYPE_SOCKET) { // skynet socketÏûÏ¢
+	if (type == PTYPE_SOCKET) { // skynet socketæ¶ˆæ¯
 		dispatch_socket(ud, msg, (int)sz);
 		return 0;
 	}
 
-	// ±ğµÄÎªmaster·şÎñ
+	// åˆ«çš„ä¸ºmasteræœåŠ¡
 	if (type != PTYPE_HARBOR) {
 		skynet_error(context, "None harbor message recv from %x (type = %d)", source, type);
 		return 0;
@@ -317,56 +317,56 @@ _mainloop(struct skynet_context * context, void * ud, int type, int session, uin
 	assert(sz >= 4);
 	struct master *m = ud;
 	const uint8_t *handlen = msg;
-	uint32_t handle = handlen[0]<<24 | handlen[1]<<16 | handlen[2]<<8 | handlen[3]; // ´óĞ¡¶Ë×Ö½ÚĞòµÄ×ª»»
+	uint32_t handle = handlen[0]<<24 | handlen[1]<<16 | handlen[2]<<8 | handlen[3]; // å¤§å°ç«¯å­—èŠ‚åºçš„è½¬æ¢
 	sz -= 4;
 	const char * name = msg;
 	name += 4;
 
-	// Í¬²½²»Í¬µÄ½Úµã
+	// åŒæ­¥ä¸åŒçš„èŠ‚ç‚¹
 	if (handle == 0) {
 		_request_name(m , name, sz);
 	}
-	else if (handle < REMOTE_MAX) { // Ã»ÓĞ´ïµ½×î´óÊı
+	else if (handle < REMOTE_MAX) { // æ²¡æœ‰è¾¾åˆ°æœ€å¤§æ•°
 		_update_address(m , handle, name, sz);
 	}
 	else {
-		_update_name(m , handle, name, sz); // ²åÈëĞÂµÄnameÔÚmasterÖĞ
+		_update_name(m , handle, name, sz); // æ’å…¥æ–°çš„nameåœ¨masterä¸­
 	}
 
 	return 0;
 }
 
-// master·şÎñ³õÊ¼»¯_init
+// masteræœåŠ¡åˆå§‹åŒ–_init
 int
 master_init(struct master *m, struct skynet_context *ctx, const char * args) {
 	char tmp[strlen(args) + 32];
 	sprintf(tmp,"gate L ! %s %d %d 0",args,PTYPE_HARBOR,REMOTE_MAX);
-	const char * gate_addr = skynet_command(ctx, "LAUNCH", tmp); // ·µ»ØµÄÊÇ16½øÖÆµÄhandle
-	// launch ¼òµ¥µÄÎÄ±¾¿ØÖÆĞ­Òé µÃµ½ gate·şÎñµÄaddr Ã¿Ò»¸ö·şÎñÊµ¼ÊÉÏ¶¼ÊÇÓÉ·şÎñ+gate×é³É
+	const char * gate_addr = skynet_command(ctx, "LAUNCH", tmp); // è¿”å›çš„æ˜¯16è¿›åˆ¶çš„handle
+	// launch ç®€å•çš„æ–‡æœ¬æ§åˆ¶åè®® å¾—åˆ° gateæœåŠ¡çš„addr æ¯ä¸€ä¸ªæœåŠ¡å®é™…ä¸Šéƒ½æ˜¯ç”±æœåŠ¡+gateç»„æˆ
 
 	if (gate_addr == NULL) {
 		skynet_error(ctx, "Master : launch gate failed");
 		return 1;
 	}
 
-	// µÃµ½ gate µÄid
+	// å¾—åˆ° gate çš„id
 	uint32_t gate = strtoul(gate_addr+1, NULL, 16);
 	if (gate == 0) {
 		skynet_error(ctx, "Master : launch gate invalid %s", gate_addr);
 		return 1;
 	}
 
-	// µÃµ½×Ô¼ºµÄ addr REGÃüÁî Êµ¼ÊÉÏÊĞµÃµ½×Ô¼ºµÄhandle
+	// å¾—åˆ°è‡ªå·±çš„ addr REGå‘½ä»¤ å®é™…ä¸Šå¸‚å¾—åˆ°è‡ªå·±çš„handle
 	const char * self_addr = skynet_command(ctx, "REG", NULL);
 	int n = sprintf(tmp,"broker %s",self_addr);
 
-	// skynet_send() ½«ÏûÏ¢·¢ËÍ³öÈ¥
+	// skynet_send() å°†æ¶ˆæ¯å‘é€å‡ºå»
 // skynet_send(struct skynet_context * context, uint32_t source, uint32_t destination ,
 //													int type, int session, void * data, size_t sz)
 	skynet_send(ctx, 0, gate, PTYPE_TEXT, 0, tmp, n);
 	skynet_send(ctx, 0, gate, PTYPE_TEXT, 0, "start", 5);
 
-	skynet_callback(ctx, m, _mainloop); // ÉèÖÃÕâ¸öctx¶ÔÓ¦µÄ»Øµ÷º¯Êı
+	skynet_callback(ctx, m, _mainloop); // è®¾ç½®è¿™ä¸ªctxå¯¹åº”çš„å›è°ƒå‡½æ•°
 
 	m->ctx = ctx;
 	return 0;

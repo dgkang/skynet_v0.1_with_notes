@@ -1,4 +1,4 @@
-#ifndef skynet_socket_h
+ï»¿#ifndef skynet_socket_h
 #define skynet_socket_h
 
 struct skynet_context;
@@ -9,7 +9,7 @@ struct skynet_context;
 #define SKYNET_SOCKET_TYPE_ACCEPT 4
 #define SKYNET_SOCKET_TYPE_ERROR 5
 
-// skynetµÄsocketÏûÏ¢½á¹¹
+// skynetçš„socketæ¶ˆæ¯ç»“æ„
 struct skynet_socket_message {
 	int type;
 	int id;

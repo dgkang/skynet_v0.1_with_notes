@@ -1,4 +1,4 @@
-#ifndef SKYNET_ENV_H
+﻿#ifndef SKYNET_ENV_H
 #define SKYNET_ENV_H
 
 const char * skynet_getenv(const char *key);

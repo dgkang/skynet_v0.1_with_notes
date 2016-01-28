@@ -1,4 +1,4 @@
-/**
+﻿/**
 *  $Id: md5.c,v 1.2 2008/03/24 20:59:12 mascarenhas Exp $
 *  Hash function MD5
 *  @author  Marcela Ozorio Suarez, Roberto I.

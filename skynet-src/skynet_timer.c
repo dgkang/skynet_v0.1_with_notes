@@ -1,4 +1,4 @@
-#include "skynet_timer.h"
+ï»¿#include "skynet_timer.h"
 #include "skynet_mq.h"
 #include "skynet_server.h"
 #include "skynet_handle.h"
@@ -17,26 +17,26 @@
 //http://blog.csdn.net/gogofly_lee/article/details/2051669
 //http://www.cnblogs.com/leaven/archive/2010/08/19/1803382.html
 
-// skynet ¶¨Ê±Æ÷µÄÊµÏÖÎªlinuxÄÚºËµÄ±ê×¼×ö·¨  ¾«¶ÈÎª 0.01s ¶ÔÓÎÏ·Ò»°ãÀ´Ëµ¹»ÁË ¸ß¾«¶ÈµÄ¶¨Ê±Æ÷ºÜ·ÑCPU
+// skynet å®šæ—¶å™¨çš„å®ç°ä¸ºlinuxå†…æ ¸çš„æ ‡å‡†åšæ³•  ç²¾åº¦ä¸º 0.01s å¯¹æ¸¸æˆä¸€èˆ¬æ¥è¯´å¤Ÿäº† é«˜ç²¾åº¦çš„å®šæ—¶å™¨å¾ˆè´¹CPU
 
 typedef void (*timer_execute_func)(void *ud,void *arg);
 
-// ¶ÔÓÚÄÚºË×î¹ØĞÄµÄ¡¢intervalÖµÔÚ£Û0£¬255£İ
-// ÄÚºËÔÚ´¦ÀíÊÇ·ñÓĞµ½ÆÚ¶¨Ê±Æ÷Ê±£¬Ëü¾ÍÖ»´Ó¶¨Ê±Æ÷ÏòÁ¿Êı×étv1.vec£Û256£İÖĞµÄÄ³¸ö¶¨Ê±Æ÷ÏòÁ¿ÄÚ½øĞĞÉ¨Ãè¡£
-// £¨2£©¶ø¶ÔÓÚÄÚºË²»¹ØĞÄµÄ¡¢intervalÖµÔÚ£Û0xff£¬0xffffffff£İÖ®¼äµÄ¶¨Ê±Æ÷£¬
-// ËüÃÇµÄµ½ÆÚ½ôÆÈ³Ì¶ÈÒ²ËæÆäintervalÖµµÄ²»Í¬¶ø²»Í¬¡£ÏÔÈ»intervalÖµÔ½Ğ¡£¬¶¨Ê±Æ÷½ôÆÈ³Ì¶ÈÒ²Ô½¸ß¡£
-// Òò´ËÔÚ½«ËüÃÇÒÔËÉÉ¢¶¨Ê±Æ÷ÏòÁ¿½øĞĞ×éÖ¯Ê±Ò²Ó¦¸ÃÇø±ğ¶Ô´ı¡£Í¨³££¬¶¨Ê±Æ÷µÄintervalÖµÔ½Ğ¡£¬
-// ËüËù´¦µÄ¶¨Ê±Æ÷ÏòÁ¿µÄËÉÉ¢¶ÈÒ²¾ÍÔ½µÍ£¨Ò²¼´ÏòÁ¿ÖĞµÄ¸÷¶¨Ê±Æ÷µÄexpiresÖµÏà²îÔ½Ğ¡£©£»¶øintervalÖµÔ½´ó£¬
-// ËüËù´¦µÄ¶¨Ê±Æ÷ÏòÁ¿µÄËÉÉ¢¶ÈÒ²¾ÍÔ½´ó£¨Ò²¼´ÏòÁ¿ÖĞµÄ¸÷¶¨Ê±Æ÷µÄexpiresÖµÏà²îÔ½´ó£©¡£
-// ËùÎ½¡°ËÉÉ¢µÄ¶¨Ê±Æ÷ÏòÁ¿ÓïÒå¡±¾ÍÊÇÖ¸£º¸÷¶¨Ê±Æ÷µÄexpiresÖµ¿ÉÒÔ»¥²»ÏàÍ¬µÄÒ»¸ö¶¨Ê±Æ÷¶ÓÁĞ¡£
+// å¯¹äºå†…æ ¸æœ€å…³å¿ƒçš„ã€intervalå€¼åœ¨ï¼»0ï¼Œ255ï¼½
+// å†…æ ¸åœ¨å¤„ç†æ˜¯å¦æœ‰åˆ°æœŸå®šæ—¶å™¨æ—¶ï¼Œå®ƒå°±åªä»å®šæ—¶å™¨å‘é‡æ•°ç»„tv1.vecï¼»256ï¼½ä¸­çš„æŸä¸ªå®šæ—¶å™¨å‘é‡å†…è¿›è¡Œæ‰«æã€‚
+// ï¼ˆ2ï¼‰è€Œå¯¹äºå†…æ ¸ä¸å…³å¿ƒçš„ã€intervalå€¼åœ¨ï¼»0xffï¼Œ0xffffffffï¼½ä¹‹é—´çš„å®šæ—¶å™¨ï¼Œ
+// å®ƒä»¬çš„åˆ°æœŸç´§è¿«ç¨‹åº¦ä¹Ÿéšå…¶intervalå€¼çš„ä¸åŒè€Œä¸åŒã€‚æ˜¾ç„¶intervalå€¼è¶Šå°ï¼Œå®šæ—¶å™¨ç´§è¿«ç¨‹åº¦ä¹Ÿè¶Šé«˜ã€‚
+// å› æ­¤åœ¨å°†å®ƒä»¬ä»¥æ¾æ•£å®šæ—¶å™¨å‘é‡è¿›è¡Œç»„ç»‡æ—¶ä¹Ÿåº”è¯¥åŒºåˆ«å¯¹å¾…ã€‚é€šå¸¸ï¼Œå®šæ—¶å™¨çš„intervalå€¼è¶Šå°ï¼Œ
+// å®ƒæ‰€å¤„çš„å®šæ—¶å™¨å‘é‡çš„æ¾æ•£åº¦ä¹Ÿå°±è¶Šä½ï¼ˆä¹Ÿå³å‘é‡ä¸­çš„å„å®šæ—¶å™¨çš„expireså€¼ç›¸å·®è¶Šå°ï¼‰ï¼›è€Œintervalå€¼è¶Šå¤§ï¼Œ
+// å®ƒæ‰€å¤„çš„å®šæ—¶å™¨å‘é‡çš„æ¾æ•£åº¦ä¹Ÿå°±è¶Šå¤§ï¼ˆä¹Ÿå³å‘é‡ä¸­çš„å„å®šæ—¶å™¨çš„expireså€¼ç›¸å·®è¶Šå¤§ï¼‰ã€‚
+// æ‰€è°“â€œæ¾æ•£çš„å®šæ—¶å™¨å‘é‡è¯­ä¹‰â€å°±æ˜¯æŒ‡ï¼šå„å®šæ—¶å™¨çš„expireså€¼å¯ä»¥äº’ä¸ç›¸åŒçš„ä¸€ä¸ªå®šæ—¶å™¨é˜Ÿåˆ—ã€‚
 
-// ÄÚºË¹æ¶¨£¬¶ÔÓÚÄÇĞ©Âú×ãÌõ¼ş£º0x100¡Üinterval¡Ü0x3fffµÄ¶¨Ê±Æ÷£¬
-// Ö»Òª±í´ïÊ½£¨interval>>8£©¾ßÓĞÏàÍ¬ÖµµÄ¶¨Ê±Æ÷¶¼½«±»×éÖ¯ÔÚÍ¬Ò»¸öËÉÉ¢¶¨Ê±Æ÷ÏòÁ¿ÖĞ£¬
-// ¼´ÒÔ1¡·8£½256ÎªÒ»¸ö»ù±¾µ¥Î»¡£Òò´Ë£¬Îª×éÖ¯ËùÓĞÂú×ãÌõ¼ş0x100¡Üinterval¡Ü0x3fffµÄ¶¨Ê±Æ÷£¬
-// ¾ÍĞèÒª2^6£½64¸öËÉÉ¢¶¨Ê±Æ÷ÏòÁ¿¡£Í¬ÑùµØ£¬Îª·½±ãÆğ¼û£¬Õâ64¸öËÉÉ¢¶¨Ê±Æ÷ÏòÁ¿Ò²·ÅÔÚÒ»ÆğĞÎ³ÉÊı×é£¬²¢×÷ÎªÊı¾İ½á¹¹timer_vecµÄÒ»²¿·Ö¡£
-// Í¬Àí¶ÔÓÚ0x4000¡Üinterval¡Ü0xfffff¡¢0x100000¡Üinterval¡Ü0x3ffffff¡¢0x4000000¡Üinterval¡Ü0xffffffff Çø¼ä£¬
-//Ö»Òª±í´ïÊ½£¨interval>>8£«6£©¡¢£¨interval>>8£«6 +6£©¡¢£¨interval>>8£«6+6+6£©µÄÖµÏàÍ¬Ôò±»·ÅÔÚÍ¬Òå¸öËÉÉ¢¶¨Ê±Æ÷ÖĞ
-//Æ÷¶¼½«±»·ÅÔÚÍ¬Ò»¸öËÉÉ¢¶¨Ê±Æ÷ÏòÁ¿ÖĞ,¹Êlink_list t Îªt[4],TIME_LEVEL_SHIFT Îª 6
+// å†…æ ¸è§„å®šï¼Œå¯¹äºé‚£äº›æ»¡è¶³æ¡ä»¶ï¼š0x100â‰¤intervalâ‰¤0x3fffçš„å®šæ—¶å™¨ï¼Œ
+// åªè¦è¡¨è¾¾å¼ï¼ˆinterval>>8ï¼‰å…·æœ‰ç›¸åŒå€¼çš„å®šæ—¶å™¨éƒ½å°†è¢«ç»„ç»‡åœ¨åŒä¸€ä¸ªæ¾æ•£å®šæ—¶å™¨å‘é‡ä¸­ï¼Œ
+// å³ä»¥1ã€‹8ï¼256ä¸ºä¸€ä¸ªåŸºæœ¬å•ä½ã€‚å› æ­¤ï¼Œä¸ºç»„ç»‡æ‰€æœ‰æ»¡è¶³æ¡ä»¶0x100â‰¤intervalâ‰¤0x3fffçš„å®šæ—¶å™¨ï¼Œ
+// å°±éœ€è¦2^6ï¼64ä¸ªæ¾æ•£å®šæ—¶å™¨å‘é‡ã€‚åŒæ ·åœ°ï¼Œä¸ºæ–¹ä¾¿èµ·è§ï¼Œè¿™64ä¸ªæ¾æ•£å®šæ—¶å™¨å‘é‡ä¹Ÿæ”¾åœ¨ä¸€èµ·å½¢æˆæ•°ç»„ï¼Œå¹¶ä½œä¸ºæ•°æ®ç»“æ„timer_vecçš„ä¸€éƒ¨åˆ†ã€‚
+// åŒç†å¯¹äº0x4000â‰¤intervalâ‰¤0xfffffã€0x100000â‰¤intervalâ‰¤0x3ffffffã€0x4000000â‰¤intervalâ‰¤0xffffffff åŒºé—´ï¼Œ
+//åªè¦è¡¨è¾¾å¼ï¼ˆinterval>>8ï¼‹6ï¼‰ã€ï¼ˆinterval>>8ï¼‹6 +6ï¼‰ã€ï¼ˆinterval>>8ï¼‹6+6+6ï¼‰çš„å€¼ç›¸åŒåˆ™è¢«æ”¾åœ¨åŒä¹‰ä¸ªæ¾æ•£å®šæ—¶å™¨ä¸­
+//å™¨éƒ½å°†è¢«æ”¾åœ¨åŒä¸€ä¸ªæ¾æ•£å®šæ—¶å™¨å‘é‡ä¸­,æ•…link_list t ä¸ºt[4],TIME_LEVEL_SHIFT ä¸º 6
 
 #define TIME_NEAR_SHIFT 8
 #define TIME_NEAR (1 << TIME_NEAR_SHIFT)   // 2^8 = 256
@@ -52,7 +52,7 @@ struct timer_event {
 
 struct timer_node {
 	struct timer_node *next;
-	int expire;		// ³¬Ê±µÎ´ğ¼ÆÊı ¼´³¬Ê±¼ä¸ô
+	int expire;		// è¶…æ—¶æ»´ç­”è®¡æ•° å³è¶…æ—¶é—´éš”
 };
 
 struct link_list {
@@ -61,17 +61,17 @@ struct link_list {
 };
 
 struct timer {
-	struct link_list near[TIME_NEAR]; // ¶¨Ê±Æ÷ÈİÆ÷×é ´æ·ÅÁË²»Í¬µÄ¶¨Ê±Æ÷ÈİÆ÷
-	struct link_list t[4][TIME_LEVEL-1]; // 4¼¶Ìİ¶Ó 4¼¶²»Í¬µÄ¶¨Ê±Æ÷
-	int lock;               // ÓÃÓÚÊµÏÖ×ÔĞıËø
-	int time;				// µ±Ç°ÒÑ¾­Á÷¹ıµÄµÎ´ğ¼ÆÊı
-	uint32_t current;		// µ±Ç°Ê±¼ä£¬Ïà¶ÔÏµÍ³¿ª»úÊ±¼ä£¨Ïà¶ÔÊ±¼ä£©
-	uint32_t starttime;		// ¿ª»úÆô¶¯Ê±¼ä£¨¾ø¶ÔÊ±¼ä£©
+	struct link_list near[TIME_NEAR]; // å®šæ—¶å™¨å®¹å™¨ç»„ å­˜æ”¾äº†ä¸åŒçš„å®šæ—¶å™¨å®¹å™¨
+	struct link_list t[4][TIME_LEVEL-1]; // 4çº§æ¢¯é˜Ÿ 4çº§ä¸åŒçš„å®šæ—¶å™¨
+	int lock;               // ç”¨äºå®ç°è‡ªæ—‹é”
+	int time;				// å½“å‰å·²ç»æµè¿‡çš„æ»´ç­”è®¡æ•°
+	uint32_t current;		// å½“å‰æ—¶é—´ï¼Œç›¸å¯¹ç³»ç»Ÿå¼€æœºæ—¶é—´ï¼ˆç›¸å¯¹æ—¶é—´ï¼‰
+	uint32_t starttime;		// å¼€æœºå¯åŠ¨æ—¶é—´ï¼ˆç»å¯¹æ—¶é—´ï¼‰
 };
 
 static struct timer * TI = NULL;
 
-// Çå³ıÁ´±í£¬·µ»ØÔ­Á´±íµÚÒ»¸ö½ÚµãÖ¸Õë
+// æ¸…é™¤é“¾è¡¨ï¼Œè¿”å›åŸé“¾è¡¨ç¬¬ä¸€ä¸ªèŠ‚ç‚¹æŒ‡é’ˆ
 static inline struct timer_node *
 link_clear(struct link_list *list)
 {
@@ -82,7 +82,7 @@ link_clear(struct link_list *list)
 	return ret;
 }
 
-// ½«nodeÌí¼Óµ½Á´±íÎ²²¿
+// å°†nodeæ·»åŠ åˆ°é“¾è¡¨å°¾éƒ¨
 static inline void
 link(struct link_list *list,struct timer_node *node)
 {
@@ -94,12 +94,12 @@ link(struct link_list *list,struct timer_node *node)
 static void
 add_node(struct timer *T,struct timer_node *node)
 {
-	int time=node->expire; // ³¬Ê±µÄµÎ´ğÊı
+	int time=node->expire; // è¶…æ—¶çš„æ»´ç­”æ•°
 	int current_time=T->time;
 	
-	// Èç¹û¾ÍÊÇµ±Ç°Ê±¼ä Ã»ÓĞ³¬Ê±
+	// å¦‚æœå°±æ˜¯å½“å‰æ—¶é—´ æ²¡æœ‰è¶…æ—¶
 	if ((time|TIME_NEAR_MASK)==(current_time|TIME_NEAR_MASK)) {
-		link(&T->near[time&TIME_NEAR_MASK],node); // ½«½ÚµãÌí¼Óµ½¶ÔÓ¦µÄÁ´±íÖĞ
+		link(&T->near[time&TIME_NEAR_MASK],node); // å°†èŠ‚ç‚¹æ·»åŠ åˆ°å¯¹åº”çš„é“¾è¡¨ä¸­
 	}
 	else {
 		int i;
@@ -152,7 +152,7 @@ timer_shift(struct timer *T) {
 	}	
 }
 
-// ´Ó³¬Ê±ÁĞ±íÖĞÈ¡µ½Ê±µÄÏûÏ¢À´·Ö·¢
+// ä»è¶…æ—¶åˆ—è¡¨ä¸­å–åˆ°æ—¶çš„æ¶ˆæ¯æ¥åˆ†å‘
 static inline void
 timer_execute(struct timer *T) {
 	int idx = T->time & TIME_NEAR_MASK;
@@ -166,9 +166,9 @@ timer_execute(struct timer *T) {
 			message.source = 0;
 			message.session = event->session;
 			message.data = NULL;
-			message.sz = PTYPE_RESPONSE << HANDLE_REMOTE_SHIFT; // Ïò×óÆ«ÒÆÁË 24 Î»
+			message.sz = PTYPE_RESPONSE << HANDLE_REMOTE_SHIFT; // å‘å·¦åç§»äº† 24 ä½
 
-			skynet_context_push(event->handle, &message); // ½«ÏûÏ¢·¢ËÍµ½¶ÔÓ¦µÄ handle È¥´¦Àí
+			skynet_context_push(event->handle, &message); // å°†æ¶ˆæ¯å‘é€åˆ°å¯¹åº”çš„ handle å»å¤„ç†
 			
 			struct timer_node * temp = current;
 			current=current->next;
@@ -177,7 +177,7 @@ timer_execute(struct timer *T) {
 	}
 }
 
-// Ê±¼äÃ¿¹ıÒ»¸öµÎ´ğ£¬Ö´ĞĞÒ»´Î¸Ãº¯Êı
+// æ—¶é—´æ¯è¿‡ä¸€ä¸ªæ»´ç­”ï¼Œæ‰§è¡Œä¸€æ¬¡è¯¥å‡½æ•°
 static void 
 timer_update(struct timer *T)
 {
@@ -187,7 +187,7 @@ timer_update(struct timer *T)
 	timer_execute(T);
 
 	// shift time first, and then dispatch timer message
-	// Æ«ÒÆ¶¨Ê±Æ÷ ²¢ÇÒ·Ö·¢¶¨Ê±Æ÷ÏûÏ¢ ¶¨Ê±Æ÷Ç¨ÒÆµ½ËüºÏ·¨µÄÈİÆ÷Î»ÖÃ
+	// åç§»å®šæ—¶å™¨ å¹¶ä¸”åˆ†å‘å®šæ—¶å™¨æ¶ˆæ¯ å®šæ—¶å™¨è¿ç§»åˆ°å®ƒåˆæ³•çš„å®¹å™¨ä½ç½®
 	timer_shift(T);
 	timer_execute(T);
 
@@ -218,7 +218,7 @@ timer_create_timer()
 	return r;
 }
 
-// ²åÈë¶¨Ê±Æ÷£¬timeµÄµ¥Î»ÊÇ0.01Ãë£¬Èçtime=300£¬±íÊ¾3Ãë
+// æ’å…¥å®šæ—¶å™¨ï¼Œtimeçš„å•ä½æ˜¯0.01ç§’ï¼Œå¦‚time=300ï¼Œè¡¨ç¤º3ç§’
 int
 skynet_timeout(uint32_t handle, int time, int session) {
 	if (time == 0) {
@@ -241,7 +241,7 @@ skynet_timeout(uint32_t handle, int time, int session) {
 	return session;
 }
 
-// ·µ»ØÏµÍ³¿ª»úµ½ÏÖÔÚµÄÊ±¼ä£¬µ¥Î»ÊÇ°Ù·ÖÖ®Ò»Ãë 0.01s
+// è¿”å›ç³»ç»Ÿå¼€æœºåˆ°ç°åœ¨çš„æ—¶é—´ï¼Œå•ä½æ˜¯ç™¾åˆ†ä¹‹ä¸€ç§’ 0.01s
 static uint32_t
 _gettime(void) {
 	uint32_t t;
@@ -253,8 +253,8 @@ _gettime(void) {
 #else
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	t = (uint32_t)(tv.tv_sec & 0xffffff) * 100; // &0xffffff Ö÷ÒªÊÇÎªÁË²»Òç³ö£³£²¿Õ¼ä   Êµ¼ÊÉÏÕâÀïÈç¹ûÊÇÏà¶ÔÊ±¼äµÄ»°ÉáÆúÒ²ÊÇ²»Ó°ÏìµÄ ÔÙ³Ë100 1sµÈÓÚ100¸ö0.01s
-	t += tv.tv_usec / 10000; // µ¥Î»ÊÇ 0.01 ¼´ 10^-2sÓë 10^-6sµÄ×ª»¯
+	t = (uint32_t)(tv.tv_sec & 0xffffff) * 100; // &0xffffff ä¸»è¦æ˜¯ä¸ºäº†ä¸æº¢å‡ºï¼“ï¼’ç©ºé—´   å®é™…ä¸Šè¿™é‡Œå¦‚æœæ˜¯ç›¸å¯¹æ—¶é—´çš„è¯èˆå¼ƒä¹Ÿæ˜¯ä¸å½±å“çš„ å†ä¹˜100 1sç­‰äº100ä¸ª0.01s
+	t += tv.tv_usec / 10000; // å•ä½æ˜¯ 0.01 å³ 10^-2sä¸ 10^-6sçš„è½¬åŒ–
 #endif
 	return t;
 }
@@ -263,7 +263,7 @@ void
 skynet_updatetime(void) {
 	uint32_t ct = _gettime(); // 0.01
 	if (ct != TI->current) {
-		int diff = ct >= TI->current ? ct - TI->current : (0xffffff+1)*100 - TI->current+ct; // µÃµ½Ê±¼ä¼ä¸ô
+		int diff = ct >= TI->current ? ct - TI->current : (0xffffff+1)*100 - TI->current+ct; // å¾—åˆ°æ—¶é—´é—´éš”
 		TI->current = ct;
 		int i;
 		for (i=0;i<diff;i++) {
@@ -284,8 +284,8 @@ skynet_gettime(void) {
 
 void 
 skynet_timer_init(void) {
-	TI = timer_create_timer(); // ·ÖÅä¶¨Ê±Æ÷½á¹¹
-	TI->current = _gettime();  // µÃµ½µÄµ±Ç°Ê±¼ä Ïà¶ÔÓÚ¿ª»úµÄ
+	TI = timer_create_timer(); // åˆ†é…å®šæ—¶å™¨ç»“æ„
+	TI->current = _gettime();  // å¾—åˆ°çš„å½“å‰æ—¶é—´ ç›¸å¯¹äºå¼€æœºçš„
 
 #if !defined(__APPLE__)
 	struct timespec ti;
@@ -296,7 +296,7 @@ skynet_timer_init(void) {
 	gettimeofday(&tv, NULL);
 	uint32_t sec = (uint32_t)tv.tv_sec;
 #endif
-	uint32_t mono = _gettime() / 100; // µ¥Î»ÊÇ0.01s ËùÒÔÕâÀïĞèÒª×ª³É³Éµ¥Î»Îªs
+	uint32_t mono = _gettime() / 100; // å•ä½æ˜¯0.01s æ‰€ä»¥è¿™é‡Œéœ€è¦è½¬æˆæˆå•ä½ä¸ºs
 
-	TI->starttime = sec - mono; // ¿ª»úÊ±¼ä
+	TI->starttime = sec - mono; // å¼€æœºæ—¶é—´
 }

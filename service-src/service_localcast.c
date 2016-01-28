@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_handle.h"
 #include "skynet_multicast.h"
 #include "localcast.h"
@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 
-// localcast±¾µØ¹ã²¥
+// localcastæœ¬åœ°å¹¿æ’­
 static int
 _maincb(struct skynet_context * context, void * ud, int type, int session, uint32_t source, const void * msg, size_t sz) {
 	const struct localcast *lc = msg;
@@ -22,7 +22,7 @@ _maincb(struct skynet_context * context, void * ud, int type, int session, uint3
 int
 localcast_init(void * ud, struct skynet_context *ctx, const char * args) {
 	skynet_callback(ctx, ud, _maincb);
-	skynet_command(ctx, "REG", ".cast"); // // ²ÎÊıÒÔ .xxx ¿ªÊ¼µÄ·µ»Ø±¾µØµÄ·şÎñ
+	skynet_command(ctx, "REG", ".cast"); // // å‚æ•°ä»¥ .xxx å¼€å§‹çš„è¿”å›æœ¬åœ°çš„æœåŠ¡
 
 	return 0;
 }

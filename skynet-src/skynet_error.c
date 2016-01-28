@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_handle.h"
 #include "skynet_mq.h"
 #include "skynet_server.h"
@@ -8,15 +8,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define LOG_MESSAGE_SIZE 256 // ÈÕÖ¾µÄ´óĞ¡
+#define LOG_MESSAGE_SIZE 256 // æ—¥å¿—çš„å¤§å°
 
-// skynet ¶Ô´íÎó´¦ÀíµÄ·â×°
+// skynet å¯¹é”™è¯¯å¤„ç†çš„å°è£…
 
 void 
 skynet_error(struct skynet_context * context, const char *msg, ...) {
 	static uint32_t logger = 0;
 	if (logger == 0) {
-		logger = skynet_handle_findname("logger"); // ¸ù¾İÃû³Æ²éÕÒhandle ²éÕÒ·şÎñ
+		logger = skynet_handle_findname("logger"); // æ ¹æ®åç§°æŸ¥æ‰¾handle æŸ¥æ‰¾æœåŠ¡
 	}
 	if (logger == 0) {
 		return;
@@ -25,25 +25,25 @@ skynet_error(struct skynet_context * context, const char *msg, ...) {
 	char tmp[LOG_MESSAGE_SIZE];
 	char *data = NULL;
 
-	va_list ap; // ¿É±ä²ÎÊı
+	va_list ap; // å¯å˜å‚æ•°
 
 	va_start(ap,msg);
-	int len = vsnprintf(tmp, LOG_MESSAGE_SIZE, msg, ap); // vsnprintf() ½«¿É±ä²ÎÊı¸ñÊ½»¯Êä³öµ½Ò»¸ö×Ö·ûÊı×é¡£
+	int len = vsnprintf(tmp, LOG_MESSAGE_SIZE, msg, ap); // vsnprintf() å°†å¯å˜å‚æ•°æ ¼å¼åŒ–è¾“å‡ºåˆ°ä¸€ä¸ªå­—ç¬¦æ•°ç»„ã€‚
 	va_end(ap);
 
 	if (len < LOG_MESSAGE_SIZE) {
-		data = strdup(tmp); // strdup() ½«´®¿½±´µ½ĞÂ½¨µÄÎ»ÖÃ´¦ µÃµ½Êµ¼ÊµÄ msg
+		data = strdup(tmp); // strdup() å°†ä¸²æ‹·è´åˆ°æ–°å»ºçš„ä½ç½®å¤„ å¾—åˆ°å®é™…çš„ msg
 	} else {
 		int max_size = LOG_MESSAGE_SIZE;
 		for (;;) {
 			max_size *= 2;
-			data = malloc(max_size); // msg ´óÓÚ LOG_MESSAGE_SIZE ³¢ÊÔ ·ÖÅä¸ü´óµÄ¿Õ¼äÀ´´æ·Å
+			data = malloc(max_size); // msg å¤§äº LOG_MESSAGE_SIZE å°è¯• åˆ†é…æ›´å¤§çš„ç©ºé—´æ¥å­˜æ”¾
 
 			va_start(ap,msg);
-			len = vsnprintf(data, max_size, msg, ap); // ½« msg ¸ñÊ½»¯µ½ data ÖĞ
+			len = vsnprintf(data, max_size, msg, ap); // å°† msg æ ¼å¼åŒ–åˆ° data ä¸­
 			va_end(ap);
 
-			if (len < max_size) { // ÖªµÀĞ´Èë  data µÄÊı¾İ²»±È max_size ´ó Êµ¼ÊÉÏ¾ÍÊÇ dataÄÜ´æ·Åmsg
+			if (len < max_size) { // çŸ¥é“å†™å…¥  data çš„æ•°æ®ä¸æ¯” max_size å¤§ å®é™…ä¸Šå°±æ˜¯ dataèƒ½å­˜æ”¾msg
 				break;
 			}
 			free(data);
@@ -60,6 +60,6 @@ skynet_error(struct skynet_context * context, const char *msg, ...) {
 	smsg.session = 0;
 	smsg.data = data;
 	smsg.sz = len | (PTYPE_TEXT << HANDLE_REMOTE_SHIFT);
-	skynet_context_push(logger, &smsg); // ½«ÏûÏ¢·¢ËÍµ½¶ÔÓ¦µÄ handle ÖĞ´¦Àí
+	skynet_context_push(logger, &smsg); // å°†æ¶ˆæ¯å‘é€åˆ°å¯¹åº”çš„ handle ä¸­å¤„ç†
 }
 

@@ -1,4 +1,4 @@
-#include <lua.h>
+﻿#include <lua.h>
 #include <lauxlib.h>
 #include "localcast.h"
 

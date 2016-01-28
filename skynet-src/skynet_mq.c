@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_mq.h"
 #include "skynet_handle.h"
 #include "skynet_multicast.h"
@@ -9,11 +9,11 @@
 #include <assert.h>
 #include <stdbool.h>
 
-// skynetÊ¹ÓÃÁË¶ş¼¶¶ÓÁĞ  ´ÓÈ«¾ÖµÄ globe_mq ÖĞÈ¡ mq À´´¦Àí
+// skynetä½¿ç”¨äº†äºŒçº§é˜Ÿåˆ—  ä»å…¨å±€çš„ globe_mq ä¸­å– mq æ¥å¤„ç†
 
-#define DEFAULT_QUEUE_SIZE 64       // Ä¬ÈÏ¶ÓÁĞµÄ´óĞ¡ÎÒ 64
-#define MAX_GLOBAL_MQ 0x10000		// 64K,µ¥»ú·şÎñÉÏÏŞÊÇ64K£¬Òò¶øglobal mqÊıÁ¿×î´óÖµÒ²ÊÇ64k
-									// ·şÎñµÄid¿Õ¼äÊÇ2^24¼´16M
+#define DEFAULT_QUEUE_SIZE 64       // é»˜è®¤é˜Ÿåˆ—çš„å¤§å°æˆ‘ 64
+#define MAX_GLOBAL_MQ 0x10000		// 64K,å•æœºæœåŠ¡ä¸Šé™æ˜¯64Kï¼Œå› è€Œglobal mqæ•°é‡æœ€å¤§å€¼ä¹Ÿæ˜¯64k
+									// æœåŠ¡çš„idç©ºé—´æ˜¯2^24å³16M
 
 //http://blog.codingnow.com/2012/08/skynet_bug.html
 
@@ -26,67 +26,67 @@
 #define MQ_DISPATCHING 2
 #define MQ_LOCKED 3
 
-// ÏûÏ¢¶ÓÁĞ(Ñ­»·¶ÓÁĞ)£¬ÈİÁ¿²»¹Ì¶¨£¬°´ĞèÔö³¤
-// ÏûÏ¢¶ÓÁĞ mq µÄ½á¹¹
+// æ¶ˆæ¯é˜Ÿåˆ—(å¾ªç¯é˜Ÿåˆ—)ï¼Œå®¹é‡ä¸å›ºå®šï¼ŒæŒ‰éœ€å¢é•¿
+// æ¶ˆæ¯é˜Ÿåˆ— mq çš„ç»“æ„
 struct message_queue {
-	uint32_t handle;		// ËùÊô·şÎñhandle
-	int cap;				// ÈİÁ¿
-	int head;				// ¶ÓÍ·
-	int tail;				// ¶ÓÎ²
-	int lock;				// ÓÃÓÚÊµÏÖ×ÔĞıËø ¼ÓËø½«Õâ¸öÖµÉèÖÃÎª1 ÊÍ·ÅËø½«Õâ¸öÖµÉèÖÃÎª0
-	int release;			// ÏûÏ¢¶ÓÁĞÊÍ·Å±ê¼Ç£¬µ±ÒªÊÍ·ÅÒ»¸ö·şÎñµÄÊ±ºò ÇåÀí±ê¼Ç
-							// ²»ÄÜÁ¢¼´ÊÍ·Å¸Ã·şÎñ¶ÔÓ¦µÄÏûÏ¢¶ÓÁĞ(ÓĞ¿ÉÄÜ¹¤×÷Ïß³Ì»¹ÔÚ²Ù×÷mq)£¬¾ÍĞèÒªÉèÖÃÒ»¸ö±ê¼Ç ±ê¼ÇÊÇ·ñ¿ÉÒÔÊÍ·Å
+	uint32_t handle;		// æ‰€å±æœåŠ¡handle
+	int cap;				// å®¹é‡
+	int head;				// é˜Ÿå¤´
+	int tail;				// é˜Ÿå°¾
+	int lock;				// ç”¨äºå®ç°è‡ªæ—‹é” åŠ é”å°†è¿™ä¸ªå€¼è®¾ç½®ä¸º1 é‡Šæ”¾é”å°†è¿™ä¸ªå€¼è®¾ç½®ä¸º0
+	int release;			// æ¶ˆæ¯é˜Ÿåˆ—é‡Šæ”¾æ ‡è®°ï¼Œå½“è¦é‡Šæ”¾ä¸€ä¸ªæœåŠ¡çš„æ—¶å€™ æ¸…ç†æ ‡è®°
+							// ä¸èƒ½ç«‹å³é‡Šæ”¾è¯¥æœåŠ¡å¯¹åº”çš„æ¶ˆæ¯é˜Ÿåˆ—(æœ‰å¯èƒ½å·¥ä½œçº¿ç¨‹è¿˜åœ¨æ“ä½œmq)ï¼Œå°±éœ€è¦è®¾ç½®ä¸€ä¸ªæ ‡è®° æ ‡è®°æ˜¯å¦å¯ä»¥é‡Šæ”¾
 
-	int lock_session;		// ±»Ä³¸ösession¶ÔÓ¦µÄÏûÏ¢Ëø¶¨
+	int lock_session;		// è¢«æŸä¸ªsessionå¯¹åº”çš„æ¶ˆæ¯é”å®š
 	int in_global;
-	struct skynet_message *queue;	// ÏûÏ¢¶ÓÁĞ
+	struct skynet_message *queue;	// æ¶ˆæ¯é˜Ÿåˆ—
 };
 
-// È«¾Ö¶ÓÁĞ(Ñ­»·¶ÓÁĞ£¬ÎŞËø¶ÓÁĞ)£¬ÈİÁ¿¹Ì¶¨64K ¶ş¼¶¶ÓÁĞµÄÊµÏÖ
-// ±£´æÁË ËùÓĞµÄÏûÏ¢ ¾ÍÊÇ´ÓÕâ¸ö¶ÓÁĞÖĞÈ¡ÏûÏ¢³öÀ´×ö´¦Àí
+// å…¨å±€é˜Ÿåˆ—(å¾ªç¯é˜Ÿåˆ—ï¼Œæ— é”é˜Ÿåˆ—)ï¼Œå®¹é‡å›ºå®š64K äºŒçº§é˜Ÿåˆ—çš„å®ç°
+// ä¿å­˜äº† æ‰€æœ‰çš„æ¶ˆæ¯ å°±æ˜¯ä»è¿™ä¸ªé˜Ÿåˆ—ä¸­å–æ¶ˆæ¯å‡ºæ¥åšå¤„ç†
 struct global_queue {
 	uint32_t head;
 	uint32_t tail;
-	struct message_queue ** queue;	// ÏûÏ¢¶ÓÁĞÁĞ±í£¬Ô¤ÁôMAX_GLOBAL_MQ(64K)¸ö¿Õ¼ä
-	bool * flag;	// Óëqueue¶ÔÓ¦£¬Ô¤ÁôMAX_GLOBAL_MQ(64K)¸ö¿Õ¼ä£¬ÓÃÓÚ±êÊ¶ÏàÓ¦Î»ÖÃÊÇ·ñÓĞÏûÏ¢¶ÓÁĞ
-					// µ±Ç°ÊµÏÖµÄÎŞËø¶ÓÁĞ£¬ĞèÒªÓÃµ½¸Ã±ê¼Ç ±ê¼ÇÕâ¸öÎ»ÖÃ tailÒÑ¾­ÓÃ¹ıÁË ÒÑ¾­ÍêÈ«½«Õâ¸öÏûÏ¢¶ÓÁĞ Ñ¹ÈëÈ«¾ÖµÄÏûÏ¢¶ÓÀïÖĞ
+	struct message_queue ** queue;	// æ¶ˆæ¯é˜Ÿåˆ—åˆ—è¡¨ï¼Œé¢„ç•™MAX_GLOBAL_MQ(64K)ä¸ªç©ºé—´
+	bool * flag;	// ä¸queueå¯¹åº”ï¼Œé¢„ç•™MAX_GLOBAL_MQ(64K)ä¸ªç©ºé—´ï¼Œç”¨äºæ ‡è¯†ç›¸åº”ä½ç½®æ˜¯å¦æœ‰æ¶ˆæ¯é˜Ÿåˆ—
+					// å½“å‰å®ç°çš„æ— é”é˜Ÿåˆ—ï¼Œéœ€è¦ç”¨åˆ°è¯¥æ ‡è®° æ ‡è®°è¿™ä¸ªä½ç½® tailå·²ç»ç”¨è¿‡äº† å·²ç»å®Œå…¨å°†è¿™ä¸ªæ¶ˆæ¯é˜Ÿåˆ— å‹å…¥å…¨å±€çš„æ¶ˆæ¯é˜Ÿé‡Œä¸­
 };
 
-static struct global_queue *Q = NULL; // È«¾ÖµÄÏûÏ¢¶ÓÁĞ  Q
+static struct global_queue *Q = NULL; // å…¨å±€çš„æ¶ˆæ¯é˜Ÿåˆ—  Q
 
-// ÀûÓÃ__sync_lock_test_and_setÊµÏÖµÄ×ÔĞıËø
-#define LOCK(q) while (__sync_lock_test_and_set(&(q)->lock,1)) {}	//½«q->lockÉèÖÃÎª1£¬²¢·µ»ØĞŞ¸ÄÇ°µÄÖµ
-#define UNLOCK(q) __sync_lock_release(&(q)->lock);		// ½«q->lockÖÃÎª0
+// åˆ©ç”¨__sync_lock_test_and_setå®ç°çš„è‡ªæ—‹é”
+#define LOCK(q) while (__sync_lock_test_and_set(&(q)->lock,1)) {}	//å°†q->lockè®¾ç½®ä¸º1ï¼Œå¹¶è¿”å›ä¿®æ”¹å‰çš„å€¼
+#define UNLOCK(q) __sync_lock_release(&(q)->lock);		// å°†q->lockç½®ä¸º0
 
-#define GP(p) ((p) % MAX_GLOBAL_MQ) // µÃµ½ÔÚ¶ÓÁĞÖĞµÄÎ»ÖÃ
+#define GP(p) ((p) % MAX_GLOBAL_MQ) // å¾—åˆ°åœ¨é˜Ÿåˆ—ä¸­çš„ä½ç½®
 
 /*
 	http://blog.codingnow.com/2012/10/bug_and_lockfree_queue.html
-	ÎªÁË±£Ö¤ÔÚ½ø¶ÓÁĞ²Ù×÷µÄÊ±Ğò¡£ÎÒÃÇÔÚÔ­×ÓµİÔö¶ÓÁĞÎ²Ö¸Õëºó£¬»¹ĞèÒª¶îÍâÒ»¸ö±ê¼ÇÎ»Ö¸Ê¾Êı¾İÒÑ¾­±»ÍêÕûĞ´Èë¶ÓÁĞ£¬
-	ÕâÑù²ÅÄÜÈÃ³ö¶ÓÁĞÏß³ÌÈ¡µÃÕıÈ·µÄÊı¾İ¡£
+	ä¸ºäº†ä¿è¯åœ¨è¿›é˜Ÿåˆ—æ“ä½œçš„æ—¶åºã€‚æˆ‘ä»¬åœ¨åŸå­é€’å¢é˜Ÿåˆ—å°¾æŒ‡é’ˆåï¼Œè¿˜éœ€è¦é¢å¤–ä¸€ä¸ªæ ‡è®°ä½æŒ‡ç¤ºæ•°æ®å·²ç»è¢«å®Œæ•´å†™å…¥é˜Ÿåˆ—ï¼Œ
+	è¿™æ ·æ‰èƒ½è®©å‡ºé˜Ÿåˆ—çº¿ç¨‹å–å¾—æ­£ç¡®çš„æ•°æ®ã€‚
 */
 static void 
 skynet_globalmq_push(struct message_queue * queue) {
 	struct global_queue *q= Q;
 
 	uint32_t tail = GP(__sync_fetch_and_add(&q->tail,1));
-	q->queue[tail] = queue; // ½«Õâ¸öÏûÏ¢·ÅÈëÈ«¾Ö¶ÓÁĞ
+	q->queue[tail] = queue; // å°†è¿™ä¸ªæ¶ˆæ¯æ”¾å…¥å…¨å±€é˜Ÿåˆ—
 	__sync_synchronize();
-	q->flag[tail] = true; // ±ê¼ÇÕâ¸öÎ»ÖÃ tailÒÑ¾­ÓÃ¹ıÁË ÒÑ¾­ÍêÈ«½«Õâ¸öÏûÏ¢¶ÓÁĞ Ñ¹ÈëÈ«¾ÖµÄÏûÏ¢¶ÓÀïÖĞ
+	q->flag[tail] = true; // æ ‡è®°è¿™ä¸ªä½ç½® tailå·²ç»ç”¨è¿‡äº† å·²ç»å®Œå…¨å°†è¿™ä¸ªæ¶ˆæ¯é˜Ÿåˆ— å‹å…¥å…¨å±€çš„æ¶ˆæ¯é˜Ÿé‡Œä¸­
 }
 
 /*
-	Ò»¿ªÊ¼£¬ÎÒÈÃ ¶Á¶ÓÁĞÏß³Ì Ã¦µÈĞ´¶ÓÁĞÏß³Ì Íê³ÉĞ´Èë±ê¼Ç¡£
-	ÎÒÔ­±¾¾õµÃĞ´¶ÓÁĞÏß³ÌµİÔö¶ÓÁĞÎ²Ö¸ÕëºÍĞ´ÈëÍê³É±ê¼Ç¼äÖ»ÓĞÒ»Á½Ìõ»úÆ÷Ö¸Áî£¬ËùÒÔÃ¦µÈÊÇÍêÈ«Ã»ÓĞÎÊÌâµÄ¡£
-	µ«ÊÇÎÒ´íÁË£¬ÔÙ¼«¶ËÇé¿öÏÂ£¨¶ÓÁĞÖĞÊı¾İºÜÉÙ£¬²¢·¢Ïß³Ì·Ç³£¶à£©£¬Ò²»áÔì³ÉÎÊÌâ¡£
-	ºóÀ´µÄ½â¾ö·½·¨ÊÇ£¬ĞŞ¸ÄÁË³ö¶ÓÁĞ api µÄÓïÒå¡£
-	Ô­À´µÄÓïÒåÊÇ£º
-		µ±¶ÓÁĞÎª¿ÕµÄÊ±ºò£¬·µ»ØÒ»¸ö NULL £¬·ñÔò¾ÍÒ»¶¨´Ó¶ÓÁĞÍ·²¿È¡³öÒ»¸öÊı¾İÀ´¡£
-	ĞŞ¸ÄºóµÄÓïÒåÊÇ£º
-		·µ»Ø NULL ±íÊ¾È¡¶ÓÁĞÊ§°Ü£¬Õâ¸öÊ§°Ü¿ÉÄÜÊÇÒòÎª¶ÓÁĞ¿Õ£¬Ò²¿ÉÄÜÊÇÓöµ½ÁË¾ºÕù¡£
+	ä¸€å¼€å§‹ï¼Œæˆ‘è®© è¯»é˜Ÿåˆ—çº¿ç¨‹ å¿™ç­‰å†™é˜Ÿåˆ—çº¿ç¨‹ å®Œæˆå†™å…¥æ ‡è®°ã€‚
+	æˆ‘åŸæœ¬è§‰å¾—å†™é˜Ÿåˆ—çº¿ç¨‹é€’å¢é˜Ÿåˆ—å°¾æŒ‡é’ˆå’Œå†™å…¥å®Œæˆæ ‡è®°é—´åªæœ‰ä¸€ä¸¤æ¡æœºå™¨æŒ‡ä»¤ï¼Œæ‰€ä»¥å¿™ç­‰æ˜¯å®Œå…¨æ²¡æœ‰é—®é¢˜çš„ã€‚
+	ä½†æ˜¯æˆ‘é”™äº†ï¼Œå†æç«¯æƒ…å†µä¸‹ï¼ˆé˜Ÿåˆ—ä¸­æ•°æ®å¾ˆå°‘ï¼Œå¹¶å‘çº¿ç¨‹éå¸¸å¤šï¼‰ï¼Œä¹Ÿä¼šé€ æˆé—®é¢˜ã€‚
+	åæ¥çš„è§£å†³æ–¹æ³•æ˜¯ï¼Œä¿®æ”¹äº†å‡ºé˜Ÿåˆ— api çš„è¯­ä¹‰ã€‚
+	åŸæ¥çš„è¯­ä¹‰æ˜¯ï¼š
+		å½“é˜Ÿåˆ—ä¸ºç©ºçš„æ—¶å€™ï¼Œè¿”å›ä¸€ä¸ª NULL ï¼Œå¦åˆ™å°±ä¸€å®šä»é˜Ÿåˆ—å¤´éƒ¨å–å‡ºä¸€ä¸ªæ•°æ®æ¥ã€‚
+	ä¿®æ”¹åçš„è¯­ä¹‰æ˜¯ï¼š
+		è¿”å› NULL è¡¨ç¤ºå–é˜Ÿåˆ—å¤±è´¥ï¼Œè¿™ä¸ªå¤±è´¥å¯èƒ½æ˜¯å› ä¸ºé˜Ÿåˆ—ç©ºï¼Œä¹Ÿå¯èƒ½æ˜¯é‡åˆ°äº†ç«äº‰ã€‚
 
-	ÎÒÃÇÕâ¸ö¶ÓÁĞ½öÔÚÒ»´¦Ê¹ÓÃ£¬ÔÚÊ¹ÓÃ»·¾³ÉÏ¿´£¬ĞŞ¸ÄÕâ¸ö api ÓïÒåÊÇÍêÈ«³ÉÁ¢µÄ£¬
-	ĞŞ¸ÄºóÍêÈ«½â¾öÁËÎÒÇ°ÃæµÄÎÊÌâ£¬²¢¼«´óµÄ¼ò»¯ÁË²¢·¢¶ÓÁĞ´¦ÀíµÄ´úÂë¡£
+	æˆ‘ä»¬è¿™ä¸ªé˜Ÿåˆ—ä»…åœ¨ä¸€å¤„ä½¿ç”¨ï¼Œåœ¨ä½¿ç”¨ç¯å¢ƒä¸Šçœ‹ï¼Œä¿®æ”¹è¿™ä¸ª api è¯­ä¹‰æ˜¯å®Œå…¨æˆç«‹çš„ï¼Œ
+	ä¿®æ”¹åå®Œå…¨è§£å†³äº†æˆ‘å‰é¢çš„é—®é¢˜ï¼Œå¹¶æå¤§çš„ç®€åŒ–äº†å¹¶å‘é˜Ÿåˆ—å¤„ç†çš„ä»£ç ã€‚
 */
 struct message_queue * 
 skynet_globalmq_pop() {
@@ -94,31 +94,31 @@ skynet_globalmq_pop() {
 	uint32_t head =  q->head;
 	uint32_t head_ptr = GP(head);
 
-	// ¶ÓÁĞÎª¿Õ
+	// é˜Ÿåˆ—ä¸ºç©º
 	if (head_ptr == GP(q->tail)) {
 		return NULL;
 	}
 
-	// headËùÔÚÎ»ÖÃÃ»ÓĞmq
+	// headæ‰€åœ¨ä½ç½®æ²¡æœ‰mq
 	if(!q->flag[head_ptr]) {
 		return NULL;
 	}
 
-	__sync_synchronize();	// Í¬²½Ö¸Áî ±£Ö¤Ç°ÃæµÄÖ¸ÁîÖ´ĞĞÍê±Ï£¬²Å»áÖ´ĞĞºóÃæµÄÖ¸Áî
+	__sync_synchronize();	// åŒæ­¥æŒ‡ä»¤ ä¿è¯å‰é¢çš„æŒ‡ä»¤æ‰§è¡Œå®Œæ¯•ï¼Œæ‰ä¼šæ‰§è¡Œåé¢çš„æŒ‡ä»¤
 
 	struct message_queue * mq = q->queue[head_ptr];
 
-	// CASÔ­×ÓĞÔ²Ù×÷ Èç¹ûq->head == head£¬Ôòq->head=head+1; ÒÆ¶¯Í·²¿
+	// CASåŸå­æ€§æ“ä½œ å¦‚æœq->head == headï¼Œåˆ™q->head=head+1; ç§»åŠ¨å¤´éƒ¨
 	if (!__sync_bool_compare_and_swap(&q->head, head, head+1)) {
 		return NULL;
 	}
 
-	q->flag[head_ptr] = false; // ÏûÏ¢ÒÑ¾­±»È¡×ß
+	q->flag[head_ptr] = false; // æ¶ˆæ¯å·²ç»è¢«å–èµ°
 
 	return mq;
 }
 
-// ´´½¨ÏûÏ¢¶ÓÁĞ£¬³õÊ¼ÈİÁ¿ DEFAULT_QUEUE_SIZE 64¸ö
+// åˆ›å»ºæ¶ˆæ¯é˜Ÿåˆ—ï¼Œåˆå§‹å®¹é‡ DEFAULT_QUEUE_SIZE 64ä¸ª
 struct message_queue * 
 skynet_mq_create(uint32_t handle) {
 	struct message_queue *q = malloc(sizeof(*q));
@@ -126,7 +126,7 @@ skynet_mq_create(uint32_t handle) {
 	q->cap = DEFAULT_QUEUE_SIZE;
 	q->head = 0;
 	q->tail = 0;
-	q->lock = 0; // ²»Ëø
+	q->lock = 0; // ä¸é”
 	q->in_global = MQ_IN_GLOBAL;
 	q->release = 0;
 	q->lock_session = 0;
@@ -157,9 +157,9 @@ skynet_mq_length(struct message_queue *q) {
 	UNLOCK(q)
 	
 	if (head <= tail) {
-		return tail - head; // Õı³£ Ã»ÓĞÑ­»·»ØÀ´
+		return tail - head; // æ­£å¸¸ æ²¡æœ‰å¾ªç¯å›æ¥
 	}
-	return tail + cap - head; // Ñ­»·»ØÀ´ÁË
+	return tail + cap - head; // å¾ªç¯å›æ¥äº†
 }
 
 int
@@ -167,7 +167,7 @@ skynet_mq_pop(struct message_queue *q, struct skynet_message *message) {
 	int ret = 1;
 	LOCK(q)
 
-	// ÏûÏ¢¶ÓÁĞ²»Îª¿Õ
+	// æ¶ˆæ¯é˜Ÿåˆ—ä¸ä¸ºç©º
 	if (q->head != q->tail) {
 		*message = q->queue[q->head];
 		ret = 0;
@@ -176,7 +176,7 @@ skynet_mq_pop(struct message_queue *q, struct skynet_message *message) {
 		}
 	}
 
-	// Ã»ÓĞÏûÏ¢µ¯³ö£¬ÏûÏ¢¶ÓÁĞÎª¿Õ£¬Ôò²»ÔÙ½«ÏûÏ¢¶ÓÁĞÑ¹ÈëÈ«¾Ö¶ÓÁĞ ÏûÏ¢¶ÓÁĞÎª¿ÕµÄ¾ÍÊÇ¾Í²»ÔÙÑ¹Èë globe_mq ÖĞ
+	// æ²¡æœ‰æ¶ˆæ¯å¼¹å‡ºï¼Œæ¶ˆæ¯é˜Ÿåˆ—ä¸ºç©ºï¼Œåˆ™ä¸å†å°†æ¶ˆæ¯é˜Ÿåˆ—å‹å…¥å…¨å±€é˜Ÿåˆ— æ¶ˆæ¯é˜Ÿåˆ—ä¸ºç©ºçš„å°±æ˜¯å°±ä¸å†å‹å…¥ globe_mq ä¸­
 	if (ret) {
 		q->in_global = 0;
 	}
@@ -186,20 +186,20 @@ skynet_mq_pop(struct message_queue *q, struct skynet_message *message) {
 	return ret;
 }
 
-// À©´ómq 2±¶µÄ´óĞ¡À©´ó
+// æ‰©å¤§mq 2å€çš„å¤§å°æ‰©å¤§
 static void
 expand_queue(struct message_queue *q) {
 	struct skynet_message *new_queue = malloc(sizeof(struct skynet_message) * q->cap * 2);
 	int i;
-	// ½«Ô­¶ÓÁĞÏûÏ¢°áµ½ĞÂ¶ÓÁĞ
+	// å°†åŸé˜Ÿåˆ—æ¶ˆæ¯æ¬åˆ°æ–°é˜Ÿåˆ—
 	for (i=0;i<q->cap;i++) {
 		new_queue[i] = q->queue[(q->head + i) % q->cap];
 	}
 	q->head = 0;
 	q->tail = q->cap;
-	q->cap *= 2; // 2±¶µÄ´óĞ¡À©´ó
+	q->cap *= 2; // 2å€çš„å¤§å°æ‰©å¤§
 	
-	free(q->queue); // ÊÍ·ÅÔ­À´µÄ¿Õ¼ä
+	free(q->queue); // é‡Šæ”¾åŸæ¥çš„ç©ºé—´
 	q->queue = new_queue;
 }
 
@@ -222,7 +222,7 @@ _pushhead(struct message_queue *q, struct skynet_message *message) {
 	if (head < 0) {
 		head = q->cap - 1;
 	}
-	// ¶ÓÁĞÒÑÂú À©´ó¶ÓÁĞ ÈİÁ¿2±¶
+	// é˜Ÿåˆ—å·²æ»¡ æ‰©å¤§é˜Ÿåˆ— å®¹é‡2å€
 	if (head == q->tail) {
 		expand_queue(q);
 		--q->tail;
@@ -280,14 +280,14 @@ skynet_mq_unlock(struct message_queue *q) {
 	UNLOCK(q)
 }
 
-// ³õÊ¼»¯È«¾ÖÏûÏ¢¶ÓÁĞ£¬ÈİÁ¿¹Ì¶¨64K
-// µ¥»ú·şÎñ×î´óÖµ64K,Òò¶øÈ«¾ÖÏûÏ¢¶ÓÁĞÈİÁ¿¹Ì¶¨64K,·½±ãÈ«¾ÖÏûÏ¢¶ÓÁĞÊµÏÖÎªÎŞËø¶ÓÁĞ
+// åˆå§‹åŒ–å…¨å±€æ¶ˆæ¯é˜Ÿåˆ—ï¼Œå®¹é‡å›ºå®š64K
+// å•æœºæœåŠ¡æœ€å¤§å€¼64K,å› è€Œå…¨å±€æ¶ˆæ¯é˜Ÿåˆ—å®¹é‡å›ºå®š64K,æ–¹ä¾¿å…¨å±€æ¶ˆæ¯é˜Ÿåˆ—å®ç°ä¸ºæ— é”é˜Ÿåˆ—
 void 
 skynet_mq_init() {
 	struct global_queue *q = malloc(sizeof(*q));
 	memset(q,0,sizeof(*q));
-	q->queue = malloc(MAX_GLOBAL_MQ * sizeof(struct message_queue *)); // 64µÄÏûÏ¢¶ÓÁĞ
-	q->flag = malloc(MAX_GLOBAL_MQ * sizeof(bool)); // ±êÖ¾Õâ¸öÎ»ÖÃÊÇ·ñÓÃÁË
+	q->queue = malloc(MAX_GLOBAL_MQ * sizeof(struct message_queue *)); // 64çš„æ¶ˆæ¯é˜Ÿåˆ—
+	q->flag = malloc(MAX_GLOBAL_MQ * sizeof(bool)); // æ ‡å¿—è¿™ä¸ªä½ç½®æ˜¯å¦ç”¨äº†
 	memset(q->flag, 0, sizeof(bool) * MAX_GLOBAL_MQ);
 	Q=q;
 }
@@ -298,7 +298,7 @@ skynet_mq_force_push(struct message_queue * queue) {
 	skynet_globalmq_push(queue);
 }
 
-// ½«Ò»¸öÏûÏ¢¶ÓÁĞ²åÈëµ½È«¾Ö¶ÓÁĞ
+// å°†ä¸€ä¸ªæ¶ˆæ¯é˜Ÿåˆ—æ’å…¥åˆ°å…¨å±€é˜Ÿåˆ—
 void 
 skynet_mq_pushglobal(struct message_queue *queue) {
 	LOCK(queue)
@@ -325,7 +325,7 @@ skynet_mq_mark_release(struct message_queue *q) {
 	UNLOCK(q)
 }
 
-// É¾³ıÏûÏ¢¶ÓÁĞ
+// åˆ é™¤æ¶ˆæ¯é˜Ÿåˆ—
 static int
 _drop_queue(struct message_queue *q) {
 	// todo: send message back to message source
@@ -333,7 +333,7 @@ _drop_queue(struct message_queue *q) {
 	int s = 0;
 	while(!skynet_mq_pop(q, &msg)) {
 		++s;
-		int type = msg.sz >> HANDLE_REMOTE_SHIFT; // ÓÒÒÆ 24 Î»µÃµ½¸ß 8 Î»
+		int type = msg.sz >> HANDLE_REMOTE_SHIFT; // å³ç§» 24 ä½å¾—åˆ°é«˜ 8 ä½
 		if (type == PTYPE_MULTICAST) {
 			assert((msg.sz & HANDLE_MASK) == 0);
 			skynet_multicast_dispatch((struct skynet_multicast_message *)msg.data, NULL, NULL);
@@ -350,10 +350,10 @@ skynet_mq_release(struct message_queue *q) {
 	int ret = 0;
 	LOCK(q)
 	
-	if (q->release) {	// ÓĞÊÍ·Å±ê¼Ç£¬ÔòÉ¾³ıÏûÏ¢¶ÓÁĞq
+	if (q->release) {	// æœ‰é‡Šæ”¾æ ‡è®°ï¼Œåˆ™åˆ é™¤æ¶ˆæ¯é˜Ÿåˆ—q
 		UNLOCK(q)
 		ret = _drop_queue(q);
-	} else {			// Ã»ÓĞ£¬ÔòÖØĞÂÑ¹ÈëÈ«¾Ö¶ÓÁĞ
+	} else {			// æ²¡æœ‰ï¼Œåˆ™é‡æ–°å‹å…¥å…¨å±€é˜Ÿåˆ—
 		skynet_mq_force_push(q);
 		UNLOCK(q)
 	}

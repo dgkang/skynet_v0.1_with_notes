@@ -1,4 +1,4 @@
-#include "skynet.h"
+﻿#include "skynet.h"
 #include "skynet_socket.h"
 #include "databuffer.h"
 #include "hashid.h"
@@ -12,72 +12,72 @@
 
 #define BACKLOG 32
 
-// ÿ��master����    ʵ������   master���� + gate�����ܺ�
-// ÿ��harbor����ʵ������   harbor����+gate�����ܺ�
-// gate��connection
-// gate��������skynet�����TCPͨ�� �����ⲿ����Ϣ��ʽת����skynet�ڲ�����Ϣ
+// 每个master服务    实际上是   master服务 + gate服务总和
+// 每个harbor服务　实际上是   harbor服务+gate服务总和
+// gate与connection
+// gate服务用与skynet对外的TCP通信 它将外部的消息格式转化成skynet内部的消息
 
 #if 0
 
-	Gate �� Connection
+	Gate 和 Connection
 
-	�����ᵽ�Ķ��� skynet �ڲ���Э�����ơ���һ����������Ϸ���������ⲻ�غ����ͨѶ��
-	���ͨѶ�����֣�һ����Ϸ�ͻ���ʹ�� TCP ���ӽ��� skynet �ڵ㡣��������Ϸ�����ģ��ǻ����Ƕȿ���
-	������� skynet ʵ��һ�� web �������Ļ�����Ϸ�ͻ��˾Ϳ��Եȼ���һ�����������
-	��һ���ǵ������ķ��񣬱������ݿ����������һ������ TCP ���ӡ�����Ҫ�� skynet �ڲ�����һ�� TCP ���ӳ�ȥʹ�á�
-	��Ȼ����ȫ���Ա�дһ���� skynet �ӿڹ淶ʵ�ֵ����ݿ⣬�ǻ����Ч������ʵ�п��º��������������Ľ�����ʵ��һ���ڴ� cache ���ѡ�
-	�����磬�����˲��� 10 �� lua ���룬ʵ����һ���򵥵� key-value �Ľ����ڴ����ݿ�ķ�����
-	ǰ�ߣ��ҳ�Ϊ gate �������������Ǽ���һ�� TCP �˿ڣ���������� TCP ���ӣ����������ϻ�õ�����ת���� skynet �ڲ���
-	Gate �������������ⲿ���ݰ��� skynet �ڲ���Ϣ���Ĳ�һ���ԡ��ⲿ TCP ���ķְ����⣬�� Gate ʵ���ϵ�Լ������ʵ����һ�� gate ����
-	�������ֽڵĴ�ͷ�ֽ�������ʾһ���ְ����ȡ����ģ�������ǰ��ʱ���һ������Ŀ ���������ҿ���ʵ�ֵĸ�Ϊͨ�ã�
-	����֧�ֿ����õķְ�������Erlang ���ⷽ�����ĺ�ȫ�棩�����Ҹ��뱣�ִ���ľ���
-	��Ȼ������� skynet ȥʵ��һ��ͨ�õ� web server ����� gate �Ͳ�̫�����ˡ�
-	����дһ�����Ƶ� Gate ���񲢲����ѡ�Ϊ web server ����һ�� gate �������򵥣���Ϊ������Ҫ�ְ��ˡ�
+	以上提到的都是 skynet 内部的协作机制。但一个完整的游戏服务器避免不必和外界通讯。
+	外界通讯有两种，一是游戏客互端使用 TCP 连接接入 skynet 节点。如果你对游戏不关心，那换个角度看，
+	如果你用 skynet 实现一个 web 服务器的话，游戏客户端就可以等价于一个浏览器请求。
+	另一个是第三方的服务，比如数据库服务，它接受一个或多个 TCP 连接。你需要从 skynet 内部建立一个 TCP 连接出去使用。
+	虽然，完全可以编写一个以 skynet 接口规范实现的数据库，那会更高效，但现实中恐怕很难做到。能做的仅仅是实现一个内存 cache 而已。
+	（比如，我用了不到 10 行 lua 代码，实现了一个简单的 key-value 的建议内存数据库的范例）
+	前者，我称为 gate 服务。它的特征是监听一个 TCP 端口，接受连入的 TCP 连接，并把连接上获得的数据转发到 skynet 内部。
+	Gate 可以用来消除外部数据包和 skynet 内部消息包的不一致性。外部 TCP 流的分包问题，是 Gate 实现上的约定。我实现了一个 gate 服务，
+	它按两字节的大头字节序来表示一个分包长度。这个模块基于我前段时间的一个子项目 。理论上我可以实现的更为通用，
+	可以支持可配置的分包方案（Erlang 在这方面做的很全面）。但我更想保持代码的精简。
+	固然，如果用 skynet 去实现一个通用的 web server ，这个 gate 就不太合适了。
+	但重写一个定制的 Gate 服务并不困难。为 web server 定制一个 gate 甚至更简单，因为不再需要分包了。
 
-	Gate ������ⲿ���ӣ��������������Ϣת������һ������ȥ���������Լ��������ݴ�������Ϊ������Ҫ���� gate ʵ�ֵļ���Ч��
-	C ��������ʤ������������������������ҵ���߼�������أ����ǿ����� Lua ��ɡ�
+	Gate 会接受外部连接，并把连接相关信息转发给另一个服务去处理。它自己不做数据处理是因为我们需要保持 gate 实现的简洁高效。
+	C 语言足以胜任这项工作。而包处理工作则和业务逻辑精密相关，我们可以用 Lua 完成。
 
-	�ⲿ��Ϣ�����࣬һ�������ӱ����Ľ���ͶϿ���Ϣ����һ���������ϵ����ݰ���һ��ʼ��Gate ������ת����������Ϣ��ͬһ����������
-	�������������ݰ�������һ����ͷ�����������ϵĿ��������� Gate ��������һ�ֹ���ģʽ����ÿ����ͬ�����ϵ����ݰ�ת������ͬ�Ķ��������ϡ�
-	ÿ��������������һ�����ϵ����ݰ���
+	外部信息分两类，一类是连接本身的接入和断开消息，另一类是连接上的数据包。一开始，Gate 无条件转发这两类消息到同一个处理服务。
+	但对于连接数据包，添加一个包头无疑有性能上的开销。所以 Gate 还接收另一种工作模式：把每个不同连接上的数据包转发给不同的独立服务上。
+	每个独立服务处理单一连接上的数据包。
 
-	���ߣ�����Ҳ����ѡ��Ѳ�ͬ�����ϵ����ݰ��ӿ�����Ϣ��������/�Ͽ����ӣ��з��뿪��
-	�������ֲ�ͬ���Ӷ�ת����ͬһ���ݴ������񣨶�������Դ�����У�ֻ�������������еĳ��ϣ���
+	或者，我们也可以选择把不同连接上的数据包从控制信息包（建立/断开连接）中分离开，
+	但不区分不同连接而转发给同一数据处理服务（对数据来源不敏感，只对数据内容敏感的场合）。
 
-	������ģʽ���ҷֱ��Ϊ watchdog ģʽ���� gate ���ϰ�ͷ��ͬʱ����������Ϣ��������Ϣ���������ݣ�agent ģʽ��
-	��ÿ�� agent �����������ӣ��Լ� broker ģʽ����һ�� broker ��������ͬ�����ϵ��������ݰ�������������ģʽ��
-	������Ϣ���ǽ��� watchdog ȥ�����ģ������ݰ���������� watchdog ���Ƿ��͸� agent �� broker �Ļ����򲻻��ж��������ͷ��Ҳ���������ݿ�������
-	ʶ����Щ���Ǵ��ⲿ���ͽ����ķ����Ǽ����Ϣ���������Ƿ�Ϊ PTYPE_CLIENT ����Ȼ����Ҳ�����Լ�������Ϣ������ gate ֪ͨ�㡣
+	这三种模式，我分别称为 watchdog 模式，由 gate 加上包头，同时处理控制信息和数据信息的所有数据；agent 模式，
+	让每个 agent 处理独立连接；以及 broker 模式，由一个 broker 服务处理不同连接上的所有数据包。无论是哪种模式，
+	控制信息都是交给 watchdog 去处理的，而数据包如果不发给 watchdog 而是发送给 agent 或 broker 的话，则不会有额外的数据头（也减少了数据拷贝）。
+	识别这些包是从外部发送进来的方法是检查消息包的类型是否为 PTYPE_CLIENT 。当然，你也可以自己定制消息类型让 gate 通知你。
 
-	Skynet �Ļ��������У����ڼ�Ⱥ��ͨѶ���ǲ��֣��Ѿ������� gate ģ����Ϊʵ�ֵ�һ���֡����� gate ģ����һ������� skynet ���������
-	��ʹ���� skynet ����� api ����û���漰 skynet �ڲ����κ�ϸ�ڡ��� Harbor ģ��ʹ�� gate ʱ�����õ� broker ģ�飬�Ҷ�������Ϣ������Ϊ PTYPE_HARBOR ��
+	Skynet 的基础服务中，关于集群间通讯的那部分，已经采用了 gate 模块作为实现的一部分。但是 gate 模块是一个纯粹的 skynet 服务组件，
+	仅使用了 skynet 对外的 api ，而没有涉及 skynet 内部的任何细节。在 Harbor 模块使用 gate 时，启用的 broker 模块，且定制了消息包类型为 PTYPE_HARBOR 。
 
-	�ڿ�Դ��Ŀ��ʾ�������У����ǻ�������һ���򵥵� gate �����Լ���Ӧ�� watchdog �� agent �������ø����� client ����������ȥ��
-	ͨ���ı�Э��� skynet ���н�����agent ��ת�����е� client ����� skynet �ڲ��� simpledb ����simpledb ��һ�����׵� key-value �ڴ����ݿ⡣
-	�������� client �Ϳ��������������ݿ��ѯ�͸��²����ˡ�
+	在开源项目的示范代码中，我们还启动了一个简单的 gate 服务，以及对应的 watchdog 和 agent 。可以用附带的 client 程序连接上去，
+	通过文本协议和 skynet 进行交流。agent 会转发所有的 client 输入给 skynet 内部的 simpledb 服务，simpledb 是一个简易的 key-value 内存数据库。
+	这样，从 client 就可以做基本的数据库查询和更新操作了。
 
-	ע�⣬Gate ֻ�����ȡ�ⲿ���ݣ����������д��Ҳ����˵������Щ���ӷ������ݲ�������ְ�𷶳롣
-	��Ϊʾ����skynet ��Դ��Ŀʵ����һ���򵥵Ļ�д�������񣬽��� service_client �����������������ʱ��һ�� fd ��
-	���͸�����������Ϣ�������ᱻ�������ֽڵĳ��Ȱ�ͷ��д����Ӧ�� fd �����ݲ�ͬ�ķְ�Э�飬�����Լ����Ʋ�ͬ�� client ������������ⲿ���ӷ������ݵ�ģ�顣
+	注意，Gate 只负责读取外部数据，但不负责回写。也就是说，向这些连接发送数据不是它的职责范畴。
+	作为示范，skynet 开源项目实现了一个简单的回写代理服务，叫做 service_client 。启动这个服务，启动时绑定一个 fd ，
+	发送给这个服务的消息包，都会被加上两字节的长度包头，写给对应的 fd 。根据不同的分包协议，可以自己定制不同的 client 服务来解决向外部连接发送数据的模块。
 
 #endif // 0
 
-// 1.watchdog ģʽ���� gate ���ϰ�ͷ��ͬʱ����������Ϣ��������Ϣ���������ݣ�
-// 2.agent    ģʽ����ÿ�� agent �����������ӣ�
-// 3.broker   ģʽ����һ�� broker ��������ͬ�����ϵ��������ݰ���
-// ����������ģʽ��������Ϣ���ǽ��� watchdog ȥ�����ģ������ݰ���������� watchdog ���Ƿ��͸� agent �� broker �Ļ���
-// �򲻻��ж��������ͷ��Ҳ���������ݿ�������ʶ����Щ���Ǵ��ⲿ���ͽ����ķ����Ǽ����Ϣ���������Ƿ�Ϊ PTYPE_CLIENT ����Ȼ����Ҳ�����Լ�������Ϣ������ gate ֪ͨ�㡣
+// 1.watchdog 模式，由 gate 加上包头，同时处理控制信息和数据信息的所有数据；
+// 2.agent    模式，让每个 agent 处理独立连接；
+// 3.broker   模式，由一个 broker 服务处理不同连接上的所有数据包。
+// 无论是哪种模式，控制信息都是交给 watchdog 去处理的，而数据包如果不发给 watchdog 而是发送给 agent 或 broker 的话，
+// 则不会有额外的数据头（也减少了数据拷贝）。识别这些包是从外部发送进来的方法是检查消息包的类型是否为 PTYPE_CLIENT 。当然，你也可以自己定制消息类型让 gate 通知你。
 
-// connection�ṹ�����˿ͻ��˵�������Ϣ
+// connection结构保存了客户端的连接信息
 struct connection {
-	int 				id;					// skynet_socket id skynetӦ�ò���һ��socket��
+	int 				id;					// skynet_socket id skynet应用层有一个socket池
 	uint32_t 			agent;
 	uint32_t 			client;
 	char 				remote_name[32];
 	struct databuffer 	buffer;
 };
 
-// ����� tcp����
+// 对外的 tcp连接
 struct gate {
 	struct skynet_context  *ctx;
 	int 					listen_id; 		 // listen fd
@@ -87,7 +87,7 @@ struct gate {
 	int 					header_size;
 	int 					max_connection;
 	struct 					hashid hash;
-	struct 					connection *conn; // �ͻ�������fd�ı���
+	struct 					connection *conn; // 客户端连接fd的保存
 
 	// todo: save message pool ptr for release
 	struct messagepool 		mp;
@@ -108,7 +108,7 @@ gate_release(struct gate *g) {
 	for (i=0;i<g->max_connection;i++) {
 		struct connection *c = &g->conn[i];
 		if (c->id >=0) {
-			skynet_socket_close(ctx, c->id); // �����رպͿͻ��˵�����
+			skynet_socket_close(ctx, c->id); // 主动关闭和客户端的连接
 		}
 	}
 
@@ -146,7 +146,7 @@ _forward_agent(struct gate * g, int fd, uint32_t agentaddr, uint32_t clientaddr)
 	}
 }
 
-// ��������Ĵ���
+// 控制命令的处理
 static void
 _ctrl(struct gate * g, const void * msg, int sz) {
 	struct skynet_context * ctx = g->ctx;
@@ -165,7 +165,7 @@ _ctrl(struct gate * g, const void * msg, int sz) {
 		}
 	}
 
-	// kick �ߵ�
+	// kick 踢掉
 	if (memcmp(command,"kick",i)==0) {
 		_parm(tmp, sz, i);
 		int uid = strtol(command , NULL, 10);
@@ -176,7 +176,7 @@ _ctrl(struct gate * g, const void * msg, int sz) {
 		return;
 	}
 
-	// forward ��ǰ������Ϣ
+	// forward 向前传递消息
 	if (memcmp(command,"forward",i)==0) {
 		_parm(tmp, sz, i);
 		char * client = tmp;
@@ -219,7 +219,7 @@ _ctrl(struct gate * g, const void * msg, int sz) {
 	skynet_error(ctx, "[gate] Unkown command : %s", command);
 }
 
-// ���棿 ���͵��ǿ�������
+// 报告？ 发送的是控制命令
 static void
 _report(struct gate * g, const char * data, ...) {
 	if (g->watchdog == 0) {
@@ -257,7 +257,7 @@ _forward(struct gate *g, struct connection * c, int size) {
 	}
 }
 
-// �ַ���Ϣ
+// 分发消息
 static void
 dispatch_message(struct gate *g, struct connection *c, int id, void * data, int sz) {
 	databuffer_push(&c->buffer,&g->mp, data, sz);
@@ -282,7 +282,7 @@ dispatch_message(struct gate *g, struct connection *c, int id, void * data, int 
 	}
 }
 
-// socket��Ϣ�Ĵ���
+// socket消息的处理
 static void
 dispatch_socket_message(struct gate *g, const struct skynet_socket_message * message, int sz) {
 	struct skynet_context * ctx = g->ctx;
@@ -361,12 +361,12 @@ _cb(struct skynet_context * ctx, void * ud, int type, int session, uint32_t sour
 	struct gate *g = ud;
 	switch(type) {
 
-	// skynet�ڲ����ı�Э�� һ����˵�ǿ�������
+	// skynet内部的文本协议 一般来说是控制命令
 	case PTYPE_TEXT:
 		_ctrl(g , msg , (int)sz);
 		break;
 
-	// �ͻ��˵���Ϣ
+	// 客户端的消息
 	case PTYPE_CLIENT: {
 		if (sz <=4 ) {
 			skynet_error(ctx, "Invalid client message from %x",source);
@@ -374,11 +374,11 @@ _cb(struct skynet_context * ctx, void * ud, int type, int session, uint32_t sour
 		}
 
 		// The last 4 bytes in msg are the id of socket, write following bytes to it
-		// msg�ĺ�4���ֽ���socket��id ֮����ʣ�µ��ֽ�
+		// msg的后4个字节是socket的id 之后是剩下的字节
 		const uint8_t * idbuf = msg + sz - 4;
 		uint32_t uid = idbuf[0] | idbuf[1] << 8 | idbuf[2] << 16 | idbuf[3] << 24;
 
-		// �ҵ����socket id����Ӧ�ò�ά����socket fd
+		// 找到这个socket id即在应用层维护的socket fd
 		int id = hashid_lookup(&g->hash, uid);
 		if (id>=0) {
 			// don't send id (last 4 bytes)
@@ -393,7 +393,7 @@ _cb(struct skynet_context * ctx, void * ud, int type, int session, uint32_t sour
 		}
 	}
 
-	// socket����Ϣ���� �ַ���Ϣ
+	// socket的消息类型 分发消息
 	case PTYPE_SOCKET:
 		assert(source == 0);
 		// recv socket message from skynet_socket
@@ -460,13 +460,13 @@ gate_init(struct gate *g , struct skynet_context * ctx, char * parm) {
 		return 1;
 	}
 
-	// header S����L��ͷ��
+	// header S或者L开头的
 	if (header != 'S' && header !='L') {
 		skynet_error(ctx, "Invalid data header style");
 		return 1;
 	}
 
-	// PTYPE_CLIENT �ͻ�����Ϣ
+	// PTYPE_CLIENT 客户端消息
 	if (client_tag == 0) {
 		client_tag = PTYPE_CLIENT;
 	}
@@ -498,7 +498,7 @@ gate_init(struct gate *g , struct skynet_context * ctx, char * parm) {
 	g->client_tag = client_tag;
 	g->header_size = (header=='S') ? 2 : 4;
 
-	skynet_callback(ctx,g,_cb); // �������ģ��Ļص�����
+	skynet_callback(ctx,g,_cb); // 设置这个模块的回调函数
 
-	return start_listen(g, binding); // ��ʼ�����ͻ��˵����� binding:listen_addr
+	return start_listen(g, binding); // 开始监听客户端的连接 binding:listen_addr
 }

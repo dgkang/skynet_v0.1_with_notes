@@ -1,10 +1,10 @@
-#ifndef SKYNET_MESSAGE_QUEUE_H
+ï»¿#ifndef SKYNET_MESSAGE_QUEUE_H
 #define SKYNET_MESSAGE_QUEUE_H
 
 #include <stdlib.h>
 #include <stdint.h>
 
-// sky_net ÄÚ²¿µÄÏûÏ¢
+// sky_net å†…éƒ¨çš„æ¶ˆæ¯
 struct skynet_message {
 	uint32_t source;
 	int session;

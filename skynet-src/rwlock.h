@@ -1,7 +1,7 @@
-#ifndef _RWLOCK_H_
+ï»¿#ifndef _RWLOCK_H_
 #define _RWLOCK_H_
 
-// ¶ÁÐ´ËøµÄ·­×ª
+// è¯»å†™é”çš„ç¿»è½¬
 struct rwlock {
 	int write;
 	int read;
@@ -16,11 +16,11 @@ rwlock_init(struct rwlock *lock) {
 static inline void
 rwlock_rlock(struct rwlock *lock) {
 	for (;;) {
-		while(lock->write) { // µÈ´ýÐ´Íê ÔÙ¶Á
+		while(lock->write) { // ç­‰å¾…å†™å®Œ å†è¯»
 			__sync_synchronize();
 		}
-		__sync_add_and_fetch(&lock->read,1); // ¶ÁËø
-		if (lock->write) { // Èç¹ûÔÚÐ´ ÊÍ·Å¶ÁËø
+		__sync_add_and_fetch(&lock->read,1); // è¯»é”
+		if (lock->write) { // å¦‚æžœåœ¨å†™ é‡Šæ”¾è¯»é”
 			__sync_sub_and_fetch(&lock->read,1);
 		} else {
 			break;
@@ -30,8 +30,8 @@ rwlock_rlock(struct rwlock *lock) {
 
 static inline void
 rwlock_wlock(struct rwlock *lock) {
-	while (__sync_lock_test_and_set(&lock->write,1)) {} // ³¢ÊÔ¼ÓÐ´Ëø
-	while(lock->read) { // Èç¹ûÔÚ¶Á ÏÈµÈ´ý¶ÁÍê
+	while (__sync_lock_test_and_set(&lock->write,1)) {} // å°è¯•åŠ å†™é”
+	while(lock->read) { // å¦‚æžœåœ¨è¯» å…ˆç­‰å¾…è¯»å®Œ
 		__sync_synchronize();
 	}
 }

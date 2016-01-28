@@ -1,4 +1,4 @@
-#ifndef TRACE_SERVICE_H
+﻿#ifndef TRACE_SERVICE_H
 #define TRACE_SERVICE_H
 
 #include <time.h>

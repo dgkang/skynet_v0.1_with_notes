@@ -1,4 +1,4 @@
-#include "timingqueue.h"
+ï»¿#include "timingqueue.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -11,7 +11,7 @@ struct session_time {
 	double time;
 };
 
-// ¶¨Ê±Æ÷¶ÓÁÐ ?
+// å®šæ—¶å™¨é˜Ÿåˆ— ?
 struct tqueue {
 	int cap;
 	int n;

@@ -1,4 +1,4 @@
-#include "skynet_imp.h"
+ï»¿#include "skynet_imp.h"
 #include "skynet_env.h"
 #include "luacompat52.h"
 
@@ -40,32 +40,32 @@ static void
 _init_env(lua_State *L) {
 	lua_pushglobaltable(L);
 	lua_pushnil(L);  /* first key */
-	while (lua_next(L, -2) != 0) {		// µ¯³ökey²¢½«È«¾Ö±äÁ¿±íÖĞµÄÈ«¾Ö±äÁ¿ÓëÈ«¾Ö±äÁ¿ÖµÑ¹ÈëluaÕ»
-		int keyt = lua_type(L, -2);		// »ñÈ¡keyÀàĞÍ
+	while (lua_next(L, -2) != 0) {		// å¼¹å‡ºkeyå¹¶å°†å…¨å±€å˜é‡è¡¨ä¸­çš„å…¨å±€å˜é‡ä¸å…¨å±€å˜é‡å€¼å‹å…¥luaæ ˆ
+		int keyt = lua_type(L, -2);		// è·å–keyç±»å‹
 		if (keyt != LUA_TSTRING) {
 			fprintf(stderr, "Invalid config table\n");
 			exit(1);
 		}
-		const char * key = lua_tostring(L,-2);	// »ñÈ¡key
+		const char * key = lua_tostring(L,-2);	// è·å–key
 		if (lua_type(L,-1) == LUA_TBOOLEAN) {
 			int b = lua_toboolean(L,-1);
 			skynet_setenv(key,b ? "true" : "false" );
 		} else {
-			const char * value = lua_tostring(L,-1);	// »ñÈ¡value
+			const char * value = lua_tostring(L,-1);	// è·å–value
 			if (value == NULL) {
 				fprintf(stderr, "Invalid config table key = %s\n", key);
 				exit(1);
 			}
 			skynet_setenv(key,value);
 		}
-		lua_pop(L,1);	// µ¯³övalue,±£Áôkey,ÒÔ±ãÏÂÒ»´Îµü´ú
+		lua_pop(L,1);	// å¼¹å‡ºvalue,ä¿ç•™key,ä»¥ä¾¿ä¸‹ä¸€æ¬¡è¿­ä»£
 	}
-	lua_pop(L,1);		// µ¯³öÈ«¾Ö±äÁ¿±í
+	lua_pop(L,1);		// å¼¹å‡ºå…¨å±€å˜é‡è¡¨
 }
 
 int sigign() {
 	struct sigaction sa;
-	sa.sa_handler = SIG_IGN; // ºöÂÔĞÅºÅ
+	sa.sa_handler = SIG_IGN; // å¿½ç•¥ä¿¡å·
 	sigaction(SIGPIPE, &sa, 0);
 	return 0;
 }
@@ -82,7 +82,7 @@ main(int argc, char *argv[]) {
 
 	struct skynet_config config;
 
-	// lua Ïà¹ØµÄÒ»Ğ©³õÊ¼»¯
+	// lua ç›¸å…³çš„ä¸€äº›åˆå§‹åŒ–
 	struct lua_State *L = luaL_newstate();
 	luaL_openlibs(L);	// link lua lib
 	lua_close(L);
@@ -96,7 +96,7 @@ main(int argc, char *argv[]) {
 		return 1;
 	} 
 
-	// ³õÊ¼»¯ lua »·¾³
+	// åˆå§‹åŒ– lua ç¯å¢ƒ
 	_init_env(L);
 
 	const char *path = optstring("lua_path","./lualib/?.lua;./lualib/?/init.lua");
@@ -106,7 +106,7 @@ main(int argc, char *argv[]) {
 	setenv("LUA_CPATH",cpath,1);
 	optstring("luaservice","./service/?.lua");
 
-	// ¼ÓÔØÅäÖÃÏî
+	// åŠ è½½é…ç½®é¡¹
 	config.thread =  optint("thread",8);
 	config.module_path = optstring("cpath","./service/?.so");
 	config.logger = optstring("logger",NULL);

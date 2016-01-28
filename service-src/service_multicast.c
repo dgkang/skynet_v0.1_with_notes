@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_handle.h"
 #include "skynet_multicast.h"
 
@@ -16,22 +16,22 @@ multicast_release(struct skynet_multicast_group *g) {
 	skynet_multicast_deletegroup(g);
 }
 
-// ¶à²¥µÄÖ÷Òª´¦Àíº¯Êı
+// å¤šæ’­çš„ä¸»è¦å¤„ç†å‡½æ•°
 static int
 _maincb(struct skynet_context * context, void * ud, int type, int session, uint32_t source, const void * msg, size_t sz) {
 	struct skynet_multicast_group *g = ud;
 
-	// PTYPE_SYSTEM Ğ­Òé¿ØÖÆÃüÁî
+	// PTYPE_SYSTEM åè®®æ§åˆ¶å‘½ä»¤
 	if (type == PTYPE_SYSTEM) {
 		char cmd = '\0';
 		uint32_t handle = 0;
-		sscanf(msg,"%c %x",&cmd,&handle); // ¸ñÊ½»¯²ÎÊı
+		sscanf(msg,"%c %x",&cmd,&handle); // æ ¼å¼åŒ–å‚æ•°
 		if (handle == 0) {
 			skynet_error(context, "Invalid handle %s",msg);
 			return 0;
 		}
 
-		// ¼òµ¥µÄÃüÁîĞ­Òé
+		// ç®€å•çš„å‘½ä»¤åè®®
 		switch (cmd) {
 		case 'E':
 			skynet_multicast_entergroup(g, handle);
@@ -49,7 +49,7 @@ _maincb(struct skynet_context * context, void * ud, int type, int session, uint3
 		return 0;		
 	}
 
-	// ·¢ËÍÏûÏ¢³öÈ¥
+	// å‘é€æ¶ˆæ¯å‡ºå»
 	else {
 		sz |= type << HANDLE_REMOTE_SHIFT;
 		struct skynet_multicast_message * mc = skynet_multicast_create(msg, sz, source);

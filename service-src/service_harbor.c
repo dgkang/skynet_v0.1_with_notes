@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_harbor.h"
 #include "skynet_socket.h"
 
@@ -11,20 +11,20 @@
 #include <unistd.h>
 
 
-// Harbor ¼äÍ¨¹ıµ¥ÏòµÄ tcp Á¬½Ó¹ÜµÀ´«ÊäÊı¾İ£¬Íê³É²»Í¬µÄ skynet ½Úµã¼äµÄÊı¾İ½»»»¡£
-// skynet Ä¿Ç°Ö§³ÖÒ»¸öÈ«¾ÖÃû×Ö·şÎñ£¬¿ÉÒÔ°ÑÒ»¸öÏûÏ¢°ü·¢ËÍµ½ÌØ¶¨Ãû×ÖµÄ·şÎñÉÏ¡£Õâ¸ö·şÎñ²»±Ø´æÔÚÓÚµ±Ç° skynet ½ÚµãÖĞ¡£ÕâÑù£¬ÎÒÃÇ¾ÍĞèÒªÒ»¸ö»ú¹¹ÄÜ¹»Í¬²½ÕâĞ©È«¾ÖÃû×Ö¡£
-// Îª´Ë£¬ÎÒÊµÏÖÁËÒ»¸ö½Ğ×ö master µÄ·şÎñ¡£ËüµÄ×÷ÓÃ¾ÍÊÇ¹ã²¥Í¬²½ËùÓĞµÄÈ«¾ÖÃû×Ö£¬ÒÔ¼°¼ÓÈë½øÀ´µÄ skynet ½ÚµãµÄµØÖ·¡£±¾ÖÊÉÏ£¬ÕâĞ©µØÖ·Ò²ÊÇÒ»ÖÖÃû×Ö¡£
-// Í¬Ñù¿ÉÒÔÓÃ key-value µÄĞÎÊ½´¢´æ¡£¼´£¬Ã¿¸ö skynet ½ÚµãºÅ¶ÔÓ¦Ò»¸ö×Ö·û´®µÄµØÖ·¡£
+// Harbor é—´é€šè¿‡å•å‘çš„ tcp è¿æ¥ç®¡é“ä¼ è¾“æ•°æ®ï¼Œå®Œæˆä¸åŒçš„ skynet èŠ‚ç‚¹é—´çš„æ•°æ®äº¤æ¢ã€‚
+// skynet ç›®å‰æ”¯æŒä¸€ä¸ªå…¨å±€åå­—æœåŠ¡ï¼Œå¯ä»¥æŠŠä¸€ä¸ªæ¶ˆæ¯åŒ…å‘é€åˆ°ç‰¹å®šåå­—çš„æœåŠ¡ä¸Šã€‚è¿™ä¸ªæœåŠ¡ä¸å¿…å­˜åœ¨äºå½“å‰ skynet èŠ‚ç‚¹ä¸­ã€‚è¿™æ ·ï¼Œæˆ‘ä»¬å°±éœ€è¦ä¸€ä¸ªæœºæ„èƒ½å¤ŸåŒæ­¥è¿™äº›å…¨å±€åå­—ã€‚
+// ä¸ºæ­¤ï¼Œæˆ‘å®ç°äº†ä¸€ä¸ªå«åš master çš„æœåŠ¡ã€‚å®ƒçš„ä½œç”¨å°±æ˜¯å¹¿æ’­åŒæ­¥æ‰€æœ‰çš„å…¨å±€åå­—ï¼Œä»¥åŠåŠ å…¥è¿›æ¥çš„ skynet èŠ‚ç‚¹çš„åœ°å€ã€‚æœ¬è´¨ä¸Šï¼Œè¿™äº›åœ°å€ä¹Ÿæ˜¯ä¸€ç§åå­—ã€‚
+// åŒæ ·å¯ä»¥ç”¨ key-value çš„å½¢å¼å‚¨å­˜ã€‚å³ï¼Œæ¯ä¸ª skynet èŠ‚ç‚¹å·å¯¹åº”ä¸€ä¸ªå­—ç¬¦ä¸²çš„åœ°å€ã€‚
 
 // http://blog.codingnow.com/2012/08/skynet_harbor_rpc.html
 
-// harborÖ÷ÒªÓÃÓÚskynet¼¯Èº ²»Í¬½Úµã¼äµÄÍ¨ĞÅ ÊÇskynet¼¯ÈºµÄÍ¨ĞÅÄ£¿é
+// harborä¸»è¦ç”¨äºskyneté›†ç¾¤ ä¸åŒèŠ‚ç‚¹é—´çš„é€šä¿¡ æ˜¯skyneté›†ç¾¤çš„é€šä¿¡æ¨¡å—
 
 #define HASH_SIZE          4096
 #define DEFAULT_QUEUE_SIZE 1024
 
 struct msg {
-	uint8_t * buffer; // buffer·ÖÅä³öÀ´µÄ
+	uint8_t * buffer; // bufferåˆ†é…å‡ºæ¥çš„
 	size_t size;
 };
 
@@ -33,20 +33,20 @@ struct msg_queue {
 	int size;
 	int head;
 	int tail;
-	struct msg * data; // data[] slot±£´æÁË¾ßÌåµÄÊı¾İ¶ø²»ÊÇÖ¸Õë ÕâÀïµÄÊµÏÖÎª¹Ì¶¨´óĞ¡µÄ»·ĞÎ»º³åÇø ´óĞ¡²»¹»Ê±ÊÇ2±¶µÄÀ©ÕÅ
+	struct msg * data; // data[] slotä¿å­˜äº†å…·ä½“çš„æ•°æ®è€Œä¸æ˜¯æŒ‡é’ˆ è¿™é‡Œçš„å®ç°ä¸ºå›ºå®šå¤§å°çš„ç¯å½¢ç¼“å†²åŒº å¤§å°ä¸å¤Ÿæ—¶æ˜¯2å€çš„æ‰©å¼ 
 };
 
-// key-value map Á´±í ¼´ nodeµÄ½á¹¹
-// ÕâÀïÓÃÁ´µØÖ··¨½â¾öµÄ hash³åÍ»ÎÊÌâ ËùÒÔÏÈÕÒµ½ bucketÔÙÔÚÁ´±íÖĞ²éÕÒ
+// key-value map é“¾è¡¨ å³ nodeçš„ç»“æ„
+// è¿™é‡Œç”¨é“¾åœ°å€æ³•è§£å†³çš„ hashå†²çªé—®é¢˜ æ‰€ä»¥å…ˆæ‰¾åˆ° bucketå†åœ¨é“¾è¡¨ä¸­æŸ¥æ‰¾
 struct keyvalue {
-	struct keyvalue * next;      // ÕâÀïÓÃÁ´µØÖ··¨½â¾öµÄ hash³åÍ»ÎÊÌâ ËùÒÔÏÈÕÒµ½ bucketÔÙÔÚÁ´±íÖĞ²éÕÒ
+	struct keyvalue * next;      // è¿™é‡Œç”¨é“¾åœ°å€æ³•è§£å†³çš„ hashå†²çªé—®é¢˜ æ‰€ä»¥å…ˆæ‰¾åˆ° bucketå†åœ¨é“¾è¡¨ä¸­æŸ¥æ‰¾
 	char key[GLOBALNAME_LENGTH]; // value: name
 	uint32_t hash;				 // hash
 	uint32_t value;              // key  : handle
-	struct msg_queue * queue; 	 // ¸ÃÁ´±íµÄÃ¿¸ö½Úµã¶¼ÓĞÒ»¸öÏûÏ¢¶ÓÁĞmq ÓÃÓÚ±£´æÕâ¸ö½ÚµãµÄÏûÏ¢
+	struct msg_queue * queue; 	 // è¯¥é“¾è¡¨çš„æ¯ä¸ªèŠ‚ç‚¹éƒ½æœ‰ä¸€ä¸ªæ¶ˆæ¯é˜Ÿåˆ—mq ç”¨äºä¿å­˜è¿™ä¸ªèŠ‚ç‚¹çš„æ¶ˆæ¯
 };
 
-// map mapµÄÃ¿Ò»¸ö½Úµã¶¼ÓĞÒ»¸öÏûÏ¢¶ÓÁĞ
+// map mapçš„æ¯ä¸€ä¸ªèŠ‚ç‚¹éƒ½æœ‰ä¸€ä¸ªæ¶ˆæ¯é˜Ÿåˆ—
 struct hashmap {
 	struct keyvalue *node[HASH_SIZE];
 };
@@ -55,7 +55,7 @@ struct hashmap {
 	message type (8bits) is in destination high 8bits
 	harbor id (8bits) is also in that place , but  remote message doesn't need harbor id.
  */
-// ¸ß8Î»ÊÇÄ¿µÄid harbor idÒ²ÊÇÈç´Ë µ«ÊÇÔ¶³ÌµÄmsg²»ĞèÒªharbor id ?
+// é«˜8ä½æ˜¯ç›®çš„id harbor idä¹Ÿæ˜¯å¦‚æ­¤ ä½†æ˜¯è¿œç¨‹çš„msgä¸éœ€è¦harbor id ?
 
 struct remote_message_header {
 	uint32_t source;
@@ -63,28 +63,28 @@ struct remote_message_header {
 	uint32_t session;
 };
 
-// harborµÄ½á¹¹ harbor±£´æÁË±¾¼¯ÈºËùÓĞ½ÚµãµÄÍ¨ĞÅµØÖ· skynet¼¯ÈºÄÚ²¿»á¼òÀú n*n¸ö½Úµã Ïàµ±ÓÚÃ¿¸ö½Úµã¼ä¶¼½¨Á¢ÁËtcpÁ¬½Ó
+// harborçš„ç»“æ„ harborä¿å­˜äº†æœ¬é›†ç¾¤æ‰€æœ‰èŠ‚ç‚¹çš„é€šä¿¡åœ°å€ skyneté›†ç¾¤å†…éƒ¨ä¼šç®€å† n*nä¸ªèŠ‚ç‚¹ ç›¸å½“äºæ¯ä¸ªèŠ‚ç‚¹é—´éƒ½å»ºç«‹äº†tcpè¿æ¥
 struct harbor {
 	struct skynet_context *ctx; 	// skynet_ctx
-	char * local_addr;				// ±¾µØµØÖ·
+	char * local_addr;				// æœ¬åœ°åœ°å€
 	int id;                         // id
 	struct hashmap * map;           // hashmap
 	int master_fd;              	// master_fd
 	char * master_addr;             // master_addr
 	int remote_fd[REMOTE_MAX];  	// remote_fd[]
-	bool connected[REMOTE_MAX];     // ±êÊ¾remote_fd[]ÊÇ·ñ´¦ÓÚÁ¬½Ó×´Ì¬
+	bool connected[REMOTE_MAX];     // æ ‡ç¤ºremote_fd[]æ˜¯å¦å¤„äºè¿æ¥çŠ¶æ€
 	char * remote_addr[REMOTE_MAX]; // remote_addr[]
 };
 
 // hash table
 
-// ¶ÓÁĞµÄ²Ù×÷
+// é˜Ÿåˆ—çš„æ“ä½œ
 // ---------------------
 static void
 _push_queue(struct msg_queue * queue, const void * buffer, size_t sz, struct remote_message_header * header) {
 	// If there is only 1 free slot which is reserved to distinguish full/empty
 	// of circular buffer, expand it.
-	// »·ĞÎ¶ÓÁĞ ÂúÁË¾ÍÀ©´óµ½2±¶
+	// ç¯å½¢é˜Ÿåˆ— æ»¡äº†å°±æ‰©å¤§åˆ°2å€
 	if (((queue->tail + 1) % queue->size) == queue->head) {
 		struct msg * new_buffer = malloc(queue->size * 2 * sizeof(struct msg));
 		int i;
@@ -99,11 +99,11 @@ _push_queue(struct msg_queue * queue, const void * buffer, size_t sz, struct rem
 		queue->size *= 2;
 	}
 
-	struct msg * slot = &queue->data[queue->tail]; // ÕÒµ½Õâ¸ö¶ÓÁĞµÄslot·ÅÈëÕâ¸ömsg
+	struct msg * slot = &queue->data[queue->tail]; // æ‰¾åˆ°è¿™ä¸ªé˜Ÿåˆ—çš„slotæ”¾å…¥è¿™ä¸ªmsg
 	queue->tail = (queue->tail + 1) % queue->size;
 
 	slot->buffer = malloc(sz + sizeof(*header));
-	memcpy(slot->buffer, buffer, sz); // ½«buffer¿½±´µ½slotÖĞ slotÊÇ±£´æÁËÕæÕıµÄÊı¾İ ¶ø²»ÊÇ½ö½öÖ¸Õë
+	memcpy(slot->buffer, buffer, sz); // å°†bufferæ‹·è´åˆ°slotä¸­ slotæ˜¯ä¿å­˜äº†çœŸæ­£çš„æ•°æ® è€Œä¸æ˜¯ä»…ä»…æŒ‡é’ˆ
 	memcpy(slot->buffer + sz, header, sizeof(*header));
 	slot->size = sz + sizeof(*header);
 }
@@ -115,7 +115,7 @@ _pop_queue(struct msg_queue * queue) {
 	}
 
 	struct msg * slot = &queue->data[queue->head];
-	queue->head = (queue->head + 1) % queue->size; // »·ĞÎ¶ÓÁĞ
+	queue->head = (queue->head + 1) % queue->size; // ç¯å½¢é˜Ÿåˆ—
 	return slot;
 }
 
@@ -125,12 +125,12 @@ _new_queue() {
 	queue->size = DEFAULT_QUEUE_SIZE;
 	queue->head = 0;
 	queue->tail = 0;
-	queue->data = malloc(DEFAULT_QUEUE_SIZE * sizeof(struct msg)); // Ä¬ÈÏ¶ÓÁĞ´óĞ¡Îª1024µÄ»·ĞÎ¶ÓÁĞ
+	queue->data = malloc(DEFAULT_QUEUE_SIZE * sizeof(struct msg)); // é»˜è®¤é˜Ÿåˆ—å¤§å°ä¸º1024çš„ç¯å½¢é˜Ÿåˆ—
 
 	return queue;
 }
 
-// ÊÍ·Å¶ÓÁĞÖĞËùÓĞµÄ½Úµã
+// é‡Šæ”¾é˜Ÿåˆ—ä¸­æ‰€æœ‰çš„èŠ‚ç‚¹
 static void
 _release_queue(struct msg_queue *queue) {
 	if (queue == NULL)
@@ -145,14 +145,14 @@ _release_queue(struct msg_queue *queue) {
 	free(queue);
 }
 
-// hashµÄ²Ù×÷
+// hashçš„æ“ä½œ
 // -------------------
 // find name
 static struct keyvalue *
 _hash_search(struct hashmap * hash, const char name[GLOBALNAME_LENGTH]) {
 	uint32_t *ptr = (uint32_t*) name;
 	uint32_t h = ptr[0] ^ ptr[1] ^ ptr[2] ^ ptr[3];
-	struct keyvalue * node = hash->node[h % HASH_SIZE]; // ÕâÀïÓÃÁ´µØÖ··¨½â¾öµÄ hash³åÍ»ÎÊÌâ ËùÒÔÏÈÕÒµ½ bucketÔÙÔÚÁ´±íÖĞ²éÕÒ
+	struct keyvalue * node = hash->node[h % HASH_SIZE]; // è¿™é‡Œç”¨é“¾åœ°å€æ³•è§£å†³çš„ hashå†²çªé—®é¢˜ æ‰€ä»¥å…ˆæ‰¾åˆ° bucketå†åœ¨é“¾è¡¨ä¸­æŸ¥æ‰¾
 	while (node) {
 		if (node->hash == h && strncmp(node->key, name, GLOBALNAME_LENGTH) == 0) {
 			return node;
@@ -164,7 +164,7 @@ _hash_search(struct hashmap * hash, const char name[GLOBALNAME_LENGTH]) {
 
 /*
 
-// Don't support erase name yet ÔİÊ±²»Ö§³ÖnameÌŞ³ı
+// Don't support erase name yet æš‚æ—¶ä¸æ”¯æŒnameå‰”é™¤
 
 static struct void
 _hash_erase(struct hashmap * hash, char name[GLOBALNAME_LENGTH) {
@@ -190,14 +190,14 @@ _hash_insert(struct hashmap * hash, const char name[GLOBALNAME_LENGTH]) {
 	uint32_t *ptr = (uint32_t *)name;
 	uint32_t h = ptr[0] ^ ptr[1] ^ ptr[2] ^ ptr[3];
 
-	struct keyvalue ** pkv = &hash->node[h % HASH_SIZE]; // Õâ¸öbucketµÄÍ·
-	struct keyvalue * node = malloc(sizeof(*node));      // ĞÂ·ÖÅäÒ»¸ö node ³öÀ´ ·ÀÖ¹ name
+	struct keyvalue ** pkv = &hash->node[h % HASH_SIZE]; // è¿™ä¸ªbucketçš„å¤´
+	struct keyvalue * node = malloc(sizeof(*node));      // æ–°åˆ†é…ä¸€ä¸ª node å‡ºæ¥ é˜²æ­¢ name
 
 	memcpy(node->key, name, GLOBALNAME_LENGTH);
-	node->next = *pkv;  // Í·²å·¨²åÈëÁ´±íÖĞ
+	node->next = *pkv;  // å¤´æ’æ³•æ’å…¥é“¾è¡¨ä¸­
 	node->queue = NULL;
 	node->hash = h;
-	node->value = 0;    // handleÎª 0
+	node->value = 0;    // handleä¸º 0
 	*pkv = node;
 
 	return node;
@@ -219,7 +219,7 @@ _hash_delete(struct hashmap *hash) {
 		struct keyvalue * node = hash->node[i];
 		while (node) {
 			struct keyvalue * next = node->next;
-			_release_queue(node->queue); // ÊÍ·Å¶ÓÁĞ
+			_release_queue(node->queue); // é‡Šæ”¾é˜Ÿåˆ—
 			free(node);
 			node = next;
 		}
@@ -228,7 +228,7 @@ _hash_delete(struct hashmap *hash) {
 }
 
 // ----
-// skynet harborÄ£¿éµÄ½Ó¿Ú
+// skynet harboræ¨¡å—çš„æ¥å£
 struct harbor *
 harbor_create(void) {
 	struct harbor * h = malloc(sizeof(*h));
@@ -271,7 +271,7 @@ harbor_release(struct harbor *h) {
 // connect
 static int
 _connect_to(struct harbor *h, const char *ipaddress, bool blocking) {
-	char * port = strchr(ipaddress,':'); // strchrº¯ÊıÔ­ĞÍ£ºextern char *strchr(const char *s,char c);²éÕÒ×Ö·û´®sÖĞÊ×´Î³öÏÖ×Ö·ûcµÄÎ»ÖÃ¡£
+	char * port = strchr(ipaddress,':'); // strchrå‡½æ•°åŸå‹ï¼šextern char *strchr(const char *s,char c);æŸ¥æ‰¾å­—ç¬¦ä¸²sä¸­é¦–æ¬¡å‡ºç°å­—ç¬¦cçš„ä½ç½®ã€‚
 	if (port==NULL) {
 		return -1;
 	}
@@ -281,11 +281,11 @@ _connect_to(struct harbor *h, const char *ipaddress, bool blocking) {
 	memcpy(tmp,ipaddress,sz); // tmp : ip
 	tmp[sz] = '\0';
 
-	int portid = strtol(port+1, NULL,10); // 10½øÖÆµÄport
+	int portid = strtol(port+1, NULL,10); // 10è¿›åˆ¶çš„port
 
 	skynet_error(h->ctx, "Harbor(%d) connect to %s:%d", h->id, tmp, portid);
 
-	// ×èÈû»¹ÊÇ·Ç×èÈû connect masterÊ¹ÓÃÁË×èÈû
+	// é˜»å¡è¿˜æ˜¯éé˜»å¡ connect masterä½¿ç”¨äº†é˜»å¡
 	if (blocking) {
 		return skynet_socket_block_connect(h->ctx, tmp, portid);
 	}
@@ -327,19 +327,19 @@ _message_to_header(const uint32_t *message, struct remote_message_header *header
 	header->session = from_bigendian(message[2]);
 }
 
-// ·¢°ü³öÈ¥
+// å‘åŒ…å‡ºå»
 static void
 _send_package(struct skynet_context *ctx, int fd, const void * buffer, size_t sz) {
 	uint8_t * sendbuf = malloc(sz+4);
 	to_bigendian(sendbuf, sz);
-	memcpy(sendbuf+4, buffer, sz); // ·¢°üµÄÊ±ºò °üÍ·ÏÈÑ¹ÈëÁË4¸ö×Ö½ÚµÄ°üÌå´óĞ¡
+	memcpy(sendbuf+4, buffer, sz); // å‘åŒ…çš„æ—¶å€™ åŒ…å¤´å…ˆå‹å…¥äº†4ä¸ªå­—èŠ‚çš„åŒ…ä½“å¤§å°
 
 	if (skynet_socket_send(ctx, fd, sendbuf, sz+4)) {
 		skynet_error(ctx, "Send to %d error", fd);
 	}
 }
 
-// ÏòÔ¶³Ìfd·¢ËÍÏûÏ¢
+// å‘è¿œç¨‹fdå‘é€æ¶ˆæ¯
 static void
 _send_remote(struct skynet_context * ctx, int fd, const char * buffer, size_t sz, struct remote_message_header * cookie) {
 	uint32_t sz_header = sz+sizeof(*cookie);
@@ -353,7 +353,7 @@ _send_remote(struct skynet_context * ctx, int fd, const char * buffer, size_t sz
 	}
 }
 
-// harbor id[0, 255] ¸üĞÂÔ¶³ÌharborµÄaddress
+// harbor id[0, 255] æ›´æ–°è¿œç¨‹harborçš„address
 static void
 _update_remote_address(struct harbor *h, int harbor_id, const char * ipaddr) {
 	if (harbor_id == h->id) {
@@ -369,13 +369,13 @@ _update_remote_address(struct harbor *h, int harbor_id, const char * ipaddr) {
 		h->remote_addr[harbor_id] = NULL;
 	}
 
-	h->remote_fd[harbor_id] = _connect_to(h, ipaddr, false); // ·Ç×èÈûÁ¬½Ó remote server
+	h->remote_fd[harbor_id] = _connect_to(h, ipaddr, false); // éé˜»å¡è¿æ¥ remote server
 	h->connected[harbor_id] = false;
 }
 
 static void
 _dispatch_queue(struct harbor *h, struct msg_queue * queue, uint32_t handle,  const char name[GLOBALNAME_LENGTH] ) {
-	int harbor_id = handle >> HANDLE_REMOTE_SHIFT; // // Ô¶³Ì id ĞèÒªÆ«ÒÆ 24Î»µÃµ½ ËüÊ¹ÓÃÁË¸ß8Î»
+	int harbor_id = handle >> HANDLE_REMOTE_SHIFT; // // è¿œç¨‹ id éœ€è¦åç§» 24ä½å¾—åˆ° å®ƒä½¿ç”¨äº†é«˜8ä½
 	assert(harbor_id != 0);
 	struct skynet_context * context = h->ctx;
 
@@ -397,34 +397,34 @@ _dispatch_queue(struct harbor *h, struct msg_queue * queue, uint32_t handle,  co
 
 		_header_to_message(&cookie, ptr); // cookie copy to ptr buffer
 
-		_send_package(context, fd, m->buffer, m->size); // ½«Õâ¸öÏûÏ¢·¢ËÍ³öÈ¥ ·¢ËÍµ½¶ÔÓ¦µÄfd
-		m = _pop_queue(queue); // ¼ÌĞøµ¯³öÏûÏ¢
+		_send_package(context, fd, m->buffer, m->size); // å°†è¿™ä¸ªæ¶ˆæ¯å‘é€å‡ºå» å‘é€åˆ°å¯¹åº”çš„fd
+		m = _pop_queue(queue); // ç»§ç»­å¼¹å‡ºæ¶ˆæ¯
 	}
 }
 
 static void
 _update_remote_name(struct harbor *h, const char name[GLOBALNAME_LENGTH], uint32_t handle) {
-	struct keyvalue * node = _hash_search(h->map, name); // ²éÕÒÕâ¸öÔ¶³ÌÖ÷»ú
+	struct keyvalue * node = _hash_search(h->map, name); // æŸ¥æ‰¾è¿™ä¸ªè¿œç¨‹ä¸»æœº
 	if (node == NULL) {
-		node = _hash_insert(h->map, name); // ½«Õâ¸öname[]²åÈëµ½hash_mapÖĞ
+		node = _hash_insert(h->map, name); // å°†è¿™ä¸ªname[]æ’å…¥åˆ°hash_mapä¸­
 	}
 
 	node->value = handle;
 	if (node->queue) {
-		_dispatch_queue(h, node->queue, handle, name); // ½«Õâ¸ö½Úµã±£´æµÄÏûÏ¢·¢ËÍ³öÈ¥
-		_release_queue(node->queue); // ÊÍ·ÅÕâ¸ö½Úµã±£´æÏûÏ¢µÄ¶ÓÁĞ
+		_dispatch_queue(h, node->queue, handle, name); // å°†è¿™ä¸ªèŠ‚ç‚¹ä¿å­˜çš„æ¶ˆæ¯å‘é€å‡ºå»
+		_release_queue(node->queue); // é‡Šæ”¾è¿™ä¸ªèŠ‚ç‚¹ä¿å­˜æ¶ˆæ¯çš„é˜Ÿåˆ—
 		node->queue = NULL;
 	}
 }
 
-// ½«Õâ¸ö handleµÄĞÅÏ¢Í¬²½µ½masterÖĞ
+// å°†è¿™ä¸ª handleçš„ä¿¡æ¯åŒæ­¥åˆ°masterä¸­
 static void
 _request_master(struct harbor *h, const char name[GLOBALNAME_LENGTH], size_t i, uint32_t handle) {
-	uint8_t buffer[4+i]; 		  // handleÊÇuint32_t ËùÒÔĞèÒª4¸öuint8_tÀ´´æ·ÅÕâ¸öhandle
-	to_bigendian(buffer, handle); // bufferÇ°32Î»·ÅÁËhandle
+	uint8_t buffer[4+i]; 		  // handleæ˜¯uint32_t æ‰€ä»¥éœ€è¦4ä¸ªuint8_tæ¥å­˜æ”¾è¿™ä¸ªhandle
+	to_bigendian(buffer, handle); // bufferå‰32ä½æ”¾äº†handle
 	memcpy(buffer+4,name,i);
 
-	_send_package(h->ctx, h->master_fd, buffer, 4+i); // ½«Õâ¸ö handleºÍ¶ÔÓ¦µÄaddr(ip:port)µÄĞÅÏ¢Í¬²½µ½masterÖĞ
+	_send_package(h->ctx, h->master_fd, buffer, 4+i); // å°†è¿™ä¸ª handleå’Œå¯¹åº”çš„addr(ip:port)çš„ä¿¡æ¯åŒæ­¥åˆ°masterä¸­
 }
 
 /*
@@ -435,21 +435,21 @@ _request_master(struct harbor *h, const char name[GLOBALNAME_LENGTH], size_t i, 
 	n bytes string (name)
  */
 
-// ÏòÈ«¾ÖµÄ master·şÎñ¸üĞÂ½Úµãname
+// å‘å…¨å±€çš„ masteræœåŠ¡æ›´æ–°èŠ‚ç‚¹name
 static int
 _remote_send_handle(struct harbor *h, uint32_t source, uint32_t destination, int type, int session, const char * msg, size_t sz) {
 	int harbor_id = destination >> HANDLE_REMOTE_SHIFT;
 	assert(harbor_id != 0);
 	struct skynet_context * context = h->ctx;
 
-	// ±¾µØÏûÏ¢
+	// æœ¬åœ°æ¶ˆæ¯
 	if (harbor_id == h->id) {
 		// local message
 		skynet_send(context, source, destination , type | PTYPE_TAG_DONTCOPY, session, (void *)msg, sz);
 		return 1;
 	}
 
-	// Ô¶³ÌÏûÏ¢
+	// è¿œç¨‹æ¶ˆæ¯
 	int fd = h->remote_fd[harbor_id];
 	if (fd >= 0 && h->connected[harbor_id]) {
 		struct remote_message_header cookie;
@@ -468,7 +468,7 @@ _remote_send_handle(struct harbor *h, uint32_t source, uint32_t destination, int
 	return 0;
 }
 
-// Ïòmaster×¢²áĞÂµÄnameºÍhandle
+// å‘masteræ³¨å†Œæ–°çš„nameå’Œhandle
 static void
 _remote_register_name(struct harbor *h, const char name[GLOBALNAME_LENGTH], uint32_t handle) {
 	int i;
@@ -477,10 +477,10 @@ _remote_register_name(struct harbor *h, const char name[GLOBALNAME_LENGTH], uint
 			break;
 	}
 	if (handle != 0) {
-		_update_remote_name(h, name, handle); // ¸üĞÂ remote_name map
+		_update_remote_name(h, name, handle); // æ›´æ–° remote_name map
 	}
 
-	_request_master(h, name,i,handle); // ½«Õâ¸ö½Úµã¸üĞÂµ½master·şÎñ
+	_request_master(h, name,i,handle); // å°†è¿™ä¸ªèŠ‚ç‚¹æ›´æ–°åˆ°masteræœåŠ¡
 }
 
 static int
@@ -501,7 +501,7 @@ _remote_send_name(struct harbor *h, uint32_t source, const char name[GLOBALNAME_
 		_push_queue(node->queue, msg, sz, &header);
 		// 0 for request
 
-		// Ïòmaster×¢²áĞÂµÄnameºÍhandle
+		// å‘masteræ³¨å†Œæ–°çš„nameå’Œhandle
 		_remote_register_name(h, name, 0);
 		return 1;
 	} else {
@@ -516,7 +516,7 @@ harbor_id(struct harbor *h, int fd) {
 		if (h->remote_fd[i] == fd)
 			return i;
 	}
-	return 0; // ÔÚÔ¶³ÌfdÖĞÃ»ÕÒµ½Õâ¸öfd ·µ»Ø0
+	return 0; // åœ¨è¿œç¨‹fdä¸­æ²¡æ‰¾åˆ°è¿™ä¸ªfd è¿”å›0
 }
 
 static void
@@ -525,7 +525,7 @@ close_harbor(struct harbor *h, int fd) {
 	if (id == 0)
 		return;
 	skynet_error(h->ctx, "Harbor %d closed",id);
-	skynet_socket_close(h->ctx, fd); // ¹Ø±ÕÕâ¸ösocket fd
+	skynet_socket_close(h->ctx, fd); // å…³é—­è¿™ä¸ªsocket fd
 	h->remote_fd[id] = -1;
 	h->connected[id] = false;
 }
@@ -556,17 +556,17 @@ _mainloop(struct skynet_context * context, void * ud, int type, int session, uin
 			skynet_error(context, "recv invalid socket accept message");
 			break;
 		case SKYNET_SOCKET_TYPE_ERROR:
-		case SKYNET_SOCKET_TYPE_CLOSE:   // socketÀàĞÍÎªclose µÄÊ±ºò close harbor
+		case SKYNET_SOCKET_TYPE_CLOSE:   // socketç±»å‹ä¸ºclose çš„æ—¶å€™ close harbor
 			close_harbor(h, message->id);
 			break;
-		case SKYNET_SOCKET_TYPE_CONNECT: // connect µÄÊ±ºò open_harbor()
-			open_harbor(h, message->id); // ÉèÖÃÕâ¸ö ÏûÏ¢Òª·¢ËÍµÄfdÎªtcpÁ¬½Ó×´Ì¬
+		case SKYNET_SOCKET_TYPE_CONNECT: // connect çš„æ—¶å€™ open_harbor()
+			open_harbor(h, message->id); // è®¾ç½®è¿™ä¸ª æ¶ˆæ¯è¦å‘é€çš„fdä¸ºtcpè¿æ¥çŠ¶æ€
 			break;
 		}
 		return 0;
 	}
 
-	// harbor type ¼´Ô¶³ÌÏûÏ¢ ·¢¸øÄ³¸ö Ô¶³ÌÖ÷»ú
+	// harbor type å³è¿œç¨‹æ¶ˆæ¯ å‘ç»™æŸä¸ª è¿œç¨‹ä¸»æœº
 	case PTYPE_HARBOR: {
 		// remote message in
 		const char * cookie = msg;
@@ -574,17 +574,17 @@ _mainloop(struct skynet_context * context, void * ud, int type, int session, uin
 		struct remote_message_header header;
 		_message_to_header((const uint32_t *)cookie, &header);
 		if (header.source == 0) {
-			if (header.destination < REMOTE_MAX) { // Ô¶³ÌÖ÷»úhash_mapÖĞÓĞÕâ¸ö¼ÇÂ¼ÁË ÖØĞÂÁ¬½ÓÏÂ
+			if (header.destination < REMOTE_MAX) { // è¿œç¨‹ä¸»æœºhash_mapä¸­æœ‰è¿™ä¸ªè®°å½•äº† é‡æ–°è¿æ¥ä¸‹
 				// 1 byte harbor id (0~255)
 				// update remote harbor address
 				char ip [sz - 11];
 				memcpy(ip, msg, sz-12);
 				ip[sz-11] = '\0';
 
-				_update_remote_address(h, header.destination, ip); // harbor id[0, 255] ¸üĞÂÔ¶³ÌharborµÄaddress
+				_update_remote_address(h, header.destination, ip); // harbor id[0, 255] æ›´æ–°è¿œç¨‹harborçš„address
 			}
 			else {
-				// Èç¹ûÕâ¸öÔ¶³ÌÖ÷»úÃ»ÓĞ¼ÓÈëµ½ hash_map ÖĞ¹ÜÀí Ôò½«Æä¼ÓÈëµ½ hash_map µÄÃû×ÖÖĞ¹ÜÀí
+				// å¦‚æœè¿™ä¸ªè¿œç¨‹ä¸»æœºæ²¡æœ‰åŠ å…¥åˆ° hash_map ä¸­ç®¡ç† åˆ™å°†å…¶åŠ å…¥åˆ° hash_map çš„åå­—ä¸­ç®¡ç†
 				// update global name
 				if (sz - 12 > GLOBALNAME_LENGTH) {
 					char name[sz-11];
@@ -596,7 +596,7 @@ _mainloop(struct skynet_context * context, void * ud, int type, int session, uin
 				_update_remote_name(h, msg, header.destination);
 			}
 		}
-		// header.source != 0 ´ÓÒ»¸öhandle·¢ËÍµ½ÁíÍâÒ»¸öhandle
+		// header.source != 0 ä»ä¸€ä¸ªhandleå‘é€åˆ°å¦å¤–ä¸€ä¸ªhandle
 		else {
 			uint32_t destination = header.destination;
 			int type = (destination >> HANDLE_REMOTE_SHIFT) | PTYPE_TAG_DONTCOPY;
@@ -613,7 +613,7 @@ _mainloop(struct skynet_context * context, void * ud, int type, int session, uin
 		// register name message
 		const struct remote_message *rmsg = msg;
 		assert (sz == sizeof(rmsg->destination));
-		_remote_register_name(h, rmsg->destination.name, rmsg->destination.handle); // ×¢²ánameºÍ¶ÔÓ¦µÄhandle
+		_remote_register_name(h, rmsg->destination.name, rmsg->destination.handle); // æ³¨å†Œnameå’Œå¯¹åº”çš„handle
 		return 0;
 	}
 
@@ -641,7 +641,7 @@ _launch_gate(struct skynet_context * ctx, const char * local_addr) {
 	char tmp[128];
 	sprintf(tmp,"gate L ! %s %d %d 0",local_addr, PTYPE_HARBOR, REMOTE_MAX);
 
-	// µÃµ½gate·şÎñµÄhandle
+	// å¾—åˆ°gateæœåŠ¡çš„handle
 	const char * gate_addr = skynet_command(ctx, "LAUNCH", tmp);
 	if (gate_addr == NULL) {
 		fprintf(stderr, "Harbor : launch gate failed\n");
@@ -654,16 +654,16 @@ _launch_gate(struct skynet_context * ctx, const char * local_addr) {
 		exit(1);
 	}
 
-	// µÃµ½×ÔÉíµÄhandle
+	// å¾—åˆ°è‡ªèº«çš„handle
 	const char * self_addr = skynet_command(ctx, "REG", NULL);
 	int n = sprintf(tmp,"broker %s",self_addr);
 
-	// send to ÕâÀïÊ¹ÓÃµÄ¼òµ¥ÎÄ±¾Ğ­Òé PTYPE_TEXT
+	// send to è¿™é‡Œä½¿ç”¨çš„ç®€å•æ–‡æœ¬åè®® PTYPE_TEXT
 	skynet_send(ctx, 0, gate, PTYPE_TEXT, 0, tmp, n);
 	skynet_send(ctx, 0, gate, PTYPE_TEXT, 0, "start", 5);
 }
 
-// harbor module init º¯Êı
+// harbor module init å‡½æ•°
 int
 harbor_init(struct harbor *h, struct skynet_context *ctx, const char * args) {
 	h->ctx = ctx;
@@ -672,12 +672,12 @@ harbor_init(struct harbor *h, struct skynet_context *ctx, const char * args) {
 	char local_addr[sz];
 	int harbor_id = 0;
 
-	sscanf(args,"%s %s %d",master_addr, local_addr, &harbor_id); // sscanf()½«argsÀïÃæµÄÊı¾İ¸ñÊ½»¯Êä³öµ½Õâ3¸öÖµÖĞ
+	sscanf(args,"%s %s %d",master_addr, local_addr, &harbor_id); // sscanf()å°†argsé‡Œé¢çš„æ•°æ®æ ¼å¼åŒ–è¾“å‡ºåˆ°è¿™3ä¸ªå€¼ä¸­
 	h->master_addr = strdup(master_addr);
-	// strdup()½«´®¿½±´µ½ĞÂ½¨µÄÎ»ÖÃ´¦
-	// strdup()ÔÚÄÚ²¿µ÷ÓÃÁËmalloc()Îª±äÁ¿·ÖÅäÄÚ´æ£¬²»ĞèÒªÊ¹ÓÃ·µ»ØµÄ×Ö·û´®Ê±£¬ĞèÒªÓÃfree()ÊÍ·ÅÏàÓ¦µÄÄÚ´æ¿Õ¼ä£¬·ñÔò»áÔì³ÉÄÚ´æĞ¹Â©¡£
+	// strdup()å°†ä¸²æ‹·è´åˆ°æ–°å»ºçš„ä½ç½®å¤„
+	// strdup()åœ¨å†…éƒ¨è°ƒç”¨äº†malloc()ä¸ºå˜é‡åˆ†é…å†…å­˜ï¼Œä¸éœ€è¦ä½¿ç”¨è¿”å›çš„å­—ç¬¦ä¸²æ—¶ï¼Œéœ€è¦ç”¨free()é‡Šæ”¾ç›¸åº”çš„å†…å­˜ç©ºé—´ï¼Œå¦åˆ™ä¼šé€ æˆå†…å­˜æ³„æ¼ã€‚
 
-	h->master_fd = _connect_to(h, master_addr, true); // ×èÈûÁ¬½Ó master·şÎñÆ÷
+	h->master_fd = _connect_to(h, master_addr, true); // é˜»å¡è¿æ¥ masteræœåŠ¡å™¨
 	if (h->master_fd == -1) {
 		fprintf(stderr, "Harbor: Connect to master failed\n");
 		exit(1);
@@ -685,10 +685,10 @@ harbor_init(struct harbor *h, struct skynet_context *ctx, const char * args) {
 	h->local_addr = strdup(local_addr);
 	h->id = harbor_id;
 
-	// Æô¶¯gate·şÎñ ¼´tcp·şÎñ
+	// å¯åŠ¨gateæœåŠ¡ å³tcpæœåŠ¡
 	_launch_gate(ctx, local_addr);
-	skynet_callback(ctx, h, _mainloop); // ÉèÖÃÕâ¸öÄ£¿éµÄ»Øµ÷º¯Êı
-	_request_master(h, local_addr, strlen(local_addr), harbor_id); // ÏòmasterÍ¬²½Õâ¸öhandle¼´harbor_id
+	skynet_callback(ctx, h, _mainloop); // è®¾ç½®è¿™ä¸ªæ¨¡å—çš„å›è°ƒå‡½æ•°
+	_request_master(h, local_addr, strlen(local_addr), harbor_id); // å‘masteråŒæ­¥è¿™ä¸ªhandleå³harbor_id
 
 	return 0;
 }

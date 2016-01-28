@@ -1,16 +1,16 @@
-#ifndef SKYNET_IMP_H
+ï»¿#ifndef SKYNET_IMP_H
 #define SKYNET_IMP_H
 
-// skynet µÄÅäÖÃ
+// skynet çš„é…ç½®
 struct skynet_config {
-	int thread; 			  // Ïß³ÌÊı
+	int thread; 			  // çº¿ç¨‹æ•°
 	int harbor; 			  // harbor
-	const char * logger; 	  // ÈÕÖ¾·şÎñ
-	const char * module_path; // Ä£¿é ¼´·şÎñµÄÂ·¾¶ .soÎÄ¼şÂ·¾¶
-	const char * master;	  // master·şÎñ
-	const char * local;       // ±¾µØipºÍport
+	const char * logger; 	  // æ—¥å¿—æœåŠ¡
+	const char * module_path; // æ¨¡å— å³æœåŠ¡çš„è·¯å¾„ .soæ–‡ä»¶è·¯å¾„
+	const char * master;	  // masteræœåŠ¡
+	const char * local;       // æœ¬åœ°ipå’Œport
 	const char * start;       //
-	const char * standalone;  // ÊÇ·ñÊÇµ¥»ú°æ
+	const char * standalone;  // æ˜¯å¦æ˜¯å•æœºç‰ˆ
 };
 
 void skynet_start(struct skynet_config * config);

@@ -1,4 +1,4 @@
-#include "skynet_socket.h"
+ï»¿#include "skynet_socket.h"
 #include "socket_server.h"
 #include "skynet_server.h"
 #include "skynet_mq.h"
@@ -59,8 +59,8 @@ forward_message(int type, bool padding, struct socket_message * result) {
 	message.data = sm;
 	message.sz = sz | PTYPE_SOCKET << HANDLE_REMOTE_SHIFT;
 	
-	// ½«Õâ¸öÏûÏ¢ÍÆËÍµ½¶ÔÓ¦µÄ handler
-	// ²»Òªµ÷ÓÃ skynet_socket_close ÄÇ»á×èÈûÕû¸öÊÂ¼şÑ­»·
+	// å°†è¿™ä¸ªæ¶ˆæ¯æ¨é€åˆ°å¯¹åº”çš„ handler
+	// ä¸è¦è°ƒç”¨ skynet_socket_close é‚£ä¼šé˜»å¡æ•´ä¸ªäº‹ä»¶å¾ªç¯
 	if (skynet_context_push((uint32_t)result->opaque, &message)) {
 		// todo: report somewhere to close socket
 		// don't call skynet_socket_close here (It will block mainloop)
@@ -68,7 +68,7 @@ forward_message(int type, bool padding, struct socket_message * result) {
 	}
 }
 
-// µ÷ÓÃsocket_server_poll()º¯ÊıµÃµ½ÏûÏ¢ÏòÇ°´«µİÏûÏ¢
+// è°ƒç”¨socket_server_poll()å‡½æ•°å¾—åˆ°æ¶ˆæ¯å‘å‰ä¼ é€’æ¶ˆæ¯
 
 int 
 skynet_socket_poll() {

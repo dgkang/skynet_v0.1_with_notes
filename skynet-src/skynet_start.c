@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_server.h"
 #include "skynet_imp.h"
 #include "skynet_mq.h"
@@ -17,22 +17,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ¼à¿Ø
+// ç›‘æŽ§
 struct monitor {
-	int count;					// ¹¤×÷ÕßÏß³ÌÊý skynetÄÚ²¿Êµ¼ÊÉÏÊÐ count + 3 ¶àÁË3¸öÏß³ÌµÄ
-	struct skynet_monitor ** m; // monitor ¹¤×÷Ïß³Ì¼à¿Ø±í
-	pthread_cond_t  cond;  		// Ìõ¼þ±äÁ¿
-	pthread_mutex_t mutex; 		// »¥³âËø        Ìõ¼þ±äÁ¿ºÍ»¥³âËøÊµÏÖÏß³ÌµÄÍ¬²½
-	int sleep;					// Ë¯ÃßÖÐµÄ¹¤×÷ÕßÏß³ÌÊý
+	int count;					// å·¥ä½œè€…çº¿ç¨‹æ•° skynetå†…éƒ¨å®žé™…ä¸Šå¸‚ count + 3 å¤šäº†3ä¸ªçº¿ç¨‹çš„
+	struct skynet_monitor ** m; // monitor å·¥ä½œçº¿ç¨‹ç›‘æŽ§è¡¨
+	pthread_cond_t  cond;  		// æ¡ä»¶å˜é‡
+	pthread_mutex_t mutex; 		// äº’æ–¥é”        æ¡ä»¶å˜é‡å’Œäº’æ–¥é”å®žçŽ°çº¿ç¨‹çš„åŒæ­¥
+	int sleep;					// ç¡çœ ä¸­çš„å·¥ä½œè€…çº¿ç¨‹æ•°
 };
 
-// ÓÃÓÚÏß³Ì²ÎÊý ¹¤×÷Ïß³Ì
+// ç”¨äºŽçº¿ç¨‹å‚æ•° å·¥ä½œçº¿ç¨‹
 struct worker_parm {
 	struct monitor *m;
 	int id;
 };
 
-#define CHECK_ABORT if (skynet_context_total()==0) break; // ·þÎñÊýÎª0
+#define CHECK_ABORT if (skynet_context_total()==0) break; // æœåŠ¡æ•°ä¸º0
 
 static void
 create_thread(pthread_t *thread, void *(*start_routine) (void *), void *arg) {
@@ -42,10 +42,10 @@ create_thread(pthread_t *thread, void *(*start_routine) (void *), void *arg) {
 	}
 }
 
-// È«²¿Ïß³Ì¶¼Ë¯ÃßµÄÇé¿öÏÂ²Å»½ÐÑÒ»¸ö¹¤×÷Ïß³Ì(¼´Ö»ÒªÓÐ¹¤×÷Ïß³Ì´¦ÓÚ¹¤×÷×´Ì¬£¬Ôò²»ÐèÒª»½ÐÑ)
+// å…¨éƒ¨çº¿ç¨‹éƒ½ç¡çœ çš„æƒ…å†µä¸‹æ‰å”¤é†’ä¸€ä¸ªå·¥ä½œçº¿ç¨‹(å³åªè¦æœ‰å·¥ä½œçº¿ç¨‹å¤„äºŽå·¥ä½œçŠ¶æ€ï¼Œåˆ™ä¸éœ€è¦å”¤é†’)
 static void
 wakeup(struct monitor *m, int busy) {
-	if (m->sleep >= m->count - busy) { // Ë¯ÃßµÄÏß³Ì
+	if (m->sleep >= m->count - busy) { // ç¡çœ çš„çº¿ç¨‹
 		// signal sleep worker, "spurious wakeup" is harmless
 		pthread_cond_signal(&m->cond);
 	}
@@ -62,8 +62,8 @@ _socket(void *p) {
 			CHECK_ABORT
 			continue;
 		}
-		// ÓÐsocketÏûÏ¢·µ»Ø
-		wakeup(m,0);	// È«²¿Ïß³Ì¶¼Ë¯ÃßµÄÇé¿öÏÂ²Å»½ÐÑÒ»¸ö¹¤×÷Ïß³Ì(¼´Ö»ÒªÓÐ¹¤×÷Ïß³Ì´¦ÓÚ¹¤×÷×´Ì¬£¬Ôò²»ÐèÒª»½ÐÑ)
+		// æœ‰socketæ¶ˆæ¯è¿”å›ž
+		wakeup(m,0);	// å…¨éƒ¨çº¿ç¨‹éƒ½ç¡çœ çš„æƒ…å†µä¸‹æ‰å”¤é†’ä¸€ä¸ªå·¥ä½œçº¿ç¨‹(å³åªè¦æœ‰å·¥ä½œçº¿ç¨‹å¤„äºŽå·¥ä½œçŠ¶æ€ï¼Œåˆ™ä¸éœ€è¦å”¤é†’)
 	}
 	return NULL;
 }
@@ -81,7 +81,7 @@ free_monitor(struct monitor *m) {
 	free(m);
 }
 
-// ÓÃÓÚ¼à¿ØÊÇ·ñÓÐÏûÏ¢Ã»ÓÐ¼´Ê±´¦Àí
+// ç”¨äºŽç›‘æŽ§æ˜¯å¦æœ‰æ¶ˆæ¯æ²¡æœ‰å³æ—¶å¤„ç†
 static void *
 _monitor(void *p) {
 	struct monitor * m = p;
@@ -101,14 +101,14 @@ _monitor(void *p) {
 	return NULL;
 }
 
-// ÓÃÓÚ¶¨Ê±Æ÷
+// ç”¨äºŽå®šæ—¶å™¨
 static void *
 _timer(void *p) {
 	struct monitor * m = p;
 	for (;;) {
 		skynet_updatetime();
 		CHECK_ABORT
-		wakeup(m,m->count-1);	// Ö»ÒªÓÐÒ»¸öË¯ÃßÏß³Ì¾Í»½ÐÑ£¬ÈÃ¹¤×÷Ïß³ÌÈÈÆðÀ´
+		wakeup(m,m->count-1);	// åªè¦æœ‰ä¸€ä¸ªç¡çœ çº¿ç¨‹å°±å”¤é†’ï¼Œè®©å·¥ä½œçº¿ç¨‹çƒ­èµ·æ¥
 		usleep(2500);
 	}
 
@@ -120,7 +120,7 @@ _timer(void *p) {
 	return NULL;
 }
 
-// ¹¤×÷Ïß³Ì
+// å·¥ä½œçº¿ç¨‹
 static void *
 _worker(void *p) {
 	struct worker_parm *wp = p;
@@ -133,7 +133,7 @@ _worker(void *p) {
 			if (pthread_mutex_lock(&m->mutex) == 0) {
 				++ m->sleep;
 
-				// ¼Ù×°µÄÐÑÀ´Ê±ÎÞº¦µÄ ÒòÎª skynet_ctx_msg_dispatch() ¿ÉÒÔÔÚÈÎºÎÊ±ºò±»µ÷ÓÃ
+				// å‡è£…çš„é†’æ¥æ—¶æ— å®³çš„ å› ä¸º skynet_ctx_msg_dispatch() å¯ä»¥åœ¨ä»»ä½•æ—¶å€™è¢«è°ƒç”¨
 				// "spurious wakeup" is harmless,
 				// because skynet_context_message_dispatch() can be call at any time.
 				pthread_cond_wait(&m->cond, &m->mutex); // wait for wakeup
@@ -150,7 +150,7 @@ _worker(void *p) {
 
 static void
 _start(int thread) {
-	pthread_t pid[thread+3]; // Ïß³ÌÊý+3 3¸öÏß³Ì·Ö±ðÓÃÓÚ _monitor _timer  _socket ¼à¿Ø ¶¨Ê±Æ÷ socket IO
+	pthread_t pid[thread+3]; // çº¿ç¨‹æ•°+3 3ä¸ªçº¿ç¨‹åˆ†åˆ«ç”¨äºŽ _monitor _timer  _socket ç›‘æŽ§ å®šæ—¶å™¨ socket IO
 
 	struct monitor *m = malloc(sizeof(*m));
 	memset(m, 0, sizeof(*m));
@@ -184,10 +184,10 @@ _start(int thread) {
 	}
 
 	for (i=0;i<thread+3;i++) {
-		pthread_join(pid[i], NULL); // µÈ´ýËùÓÐÏß³ÌÍË³ö
+		pthread_join(pid[i], NULL); // ç­‰å¾…æ‰€æœ‰çº¿ç¨‹é€€å‡º
 	}
 
-	free_monitor(m); // ÊÍ·Å¼à¿Ø
+	free_monitor(m); // é‡Šæ”¾ç›‘æŽ§
 }
 
 static int
@@ -198,7 +198,7 @@ _start_master(const char * master) {
 	return 0;	
 }
 
-// skynet Æô¶¯µÄÊ±ºò ³õÊ¼»¯
+// skynet å¯åŠ¨çš„æ—¶å€™ åˆå§‹åŒ–
 void 
 skynet_start(struct skynet_config * config) {
 	skynet_group_init();
@@ -216,7 +216,7 @@ skynet_start(struct skynet_config * config) {
 		exit(1);
 	}
 
-	if (config->standalone) { // ÊÇ·ñÊÇµ¥»ú°æ
+	if (config->standalone) { // æ˜¯å¦æ˜¯å•æœºç‰ˆ
 		if (_start_master(config->standalone)) {
 			fprintf(stderr, "Init fail : mater");
 			return;

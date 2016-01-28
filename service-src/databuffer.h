@@ -1,4 +1,4 @@
-#ifndef skynet_databuffer_h
+ï»¿#ifndef skynet_databuffer_h
 #define skynet_databuffer_h
 
 #include <stdlib.h>
@@ -7,7 +7,7 @@
 
 #define MESSAGEPOOL 1023
 
-// gate ·şÎñÖĞÓ¦ÓÃ²ãmsgµÄ»º³åÇøÊµÏÖ
+// gate æœåŠ¡ä¸­åº”ç”¨å±‚msgçš„ç¼“å†²åŒºå®ç°
 
 // msg node
 struct message {
@@ -16,7 +16,7 @@ struct message {
 	struct message * next;
 };
 
-// Êı¾İ»º³åÇøÁ´±í ÓÃÀ´±£´æÓ¦ÓÃ²ãµÄÏûÏ¢Êı¾İ
+// æ•°æ®ç¼“å†²åŒºé“¾è¡¨ ç”¨æ¥ä¿å­˜åº”ç”¨å±‚çš„æ¶ˆæ¯æ•°æ®
 struct databuffer {
 	int header;
 	int offset;
@@ -25,16 +25,16 @@ struct databuffer {
 	struct message * tail;
 };
 
-// msg_pool_list ÏûÏ¢³ØÁ´±í
+// msg_pool_list æ¶ˆæ¯æ± é“¾è¡¨
 struct messagepool_list {
 	struct messagepool_list *next;
 	struct message pool[MESSAGEPOOL];
 };
 
-// ÏûÏ¢³Ø
+// æ¶ˆæ¯æ± 
 struct messagepool {
 	struct messagepool_list * pool;
-	struct message * freelist; // ¼ÇÂ¼ÏûÏ¢Ö¸ÕëÔÚÊÍ·ÅµÄÊ±ºòÓÃ
+	struct message * freelist; // è®°å½•æ¶ˆæ¯æŒ‡é’ˆåœ¨é‡Šæ”¾çš„æ—¶å€™ç”¨
 };
 
 // use memset init struct 

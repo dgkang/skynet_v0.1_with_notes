@@ -1,4 +1,4 @@
-#ifndef skynet_timing_queue_h
+﻿#ifndef skynet_timing_queue_h
 #define skynet_timing_queue_h
 
 struct tqueue * tqueue_new();

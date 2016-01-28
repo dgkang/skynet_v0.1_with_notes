@@ -1,4 +1,4 @@
-#ifndef SKYNET_MONITOR_H
+﻿#ifndef SKYNET_MONITOR_H
 #define SKYNET_MONITOR_H
 
 #include <stdint.h>

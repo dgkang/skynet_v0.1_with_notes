@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** $Id: lua.h,v 1.285.1.2 2013/11/11 12:09:16 roberto Exp $
 ** Lua - A Scripting Language
 ** Lua.org, PUC-Rio, Brazil (http://www.lua.org)
@@ -15,7 +15,7 @@
 
 #include "luaconf.h"
 
-// lua ��ص�һЩ��� �ܶ��Ƕ�lua�ӿڵķ�װ
+// lua 相关的一些借口 很多是对lua接口的封装
 
 #define LUA_VERSION_MAJOR	"5"
 #define LUA_VERSION_MINOR	"2"

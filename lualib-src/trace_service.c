@@ -1,4 +1,4 @@
-#include "trace_service.h"
+﻿#include "trace_service.h"
 
 #include <stdlib.h>
 #include <string.h>

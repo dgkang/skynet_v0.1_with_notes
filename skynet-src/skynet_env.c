@@ -1,4 +1,4 @@
-#include "skynet_env.h"
+ï»¿#include "skynet_env.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -11,21 +11,21 @@ struct skynet_env {
 	lua_State *L;
 };
 
-// skynet »·¾³ÅäÖÃ Ö÷ÒªÊÇ»ñÈ¡ºÍÉèÖÃluaµÄ»·¾³±äÁ¿
+// skynet ç¯å¢ƒé…ç½® ä¸»è¦æ˜¯è·å–å’Œè®¾ç½®luaçš„ç¯å¢ƒå˜é‡
 static struct skynet_env *E = NULL;
 
-#define LOCK(q) while (__sync_lock_test_and_set(&(q)->lock,1)) {} // ×ÔĞıËøµÄÊµÏÖ
+#define LOCK(q) while (__sync_lock_test_and_set(&(q)->lock,1)) {} // è‡ªæ—‹é”çš„å®ç°
 #define UNLOCK(q) __sync_lock_release(&(q)->lock);
 
 const char * 
-skynet_getenv(const char *key) { // »ñÈ¡µÄÊÇ lua µÄÈ«¾Ö±äÁ¿ key Öµ
+skynet_getenv(const char *key) { // è·å–çš„æ˜¯ lua çš„å…¨å±€å˜é‡ key å€¼
 	LOCK(E)
 
 	lua_State *L = E->L;
 	
-	lua_getglobal(L, key);						// »ñÈ¡luaÈ«¾Ö±äÁ¿keyµÄÖµ,²¢Ñ¹ÈëluaÕ»
-	const char * result = lua_tostring(L, -1);	// ´ÓluaÕ»ÖĞµ¯³ö¸Ã±äÁ¿Öµ²¢¸³Öµ¸øresult
-	lua_pop(L, 1);								// µ¯³ö¸Ã±äÁ¿Öµ
+	lua_getglobal(L, key);						// è·å–luaå…¨å±€å˜é‡keyçš„å€¼,å¹¶å‹å…¥luaæ ˆ
+	const char * result = lua_tostring(L, -1);	// ä»luaæ ˆä¸­å¼¹å‡ºè¯¥å˜é‡å€¼å¹¶èµ‹å€¼ç»™result
+	lua_pop(L, 1);								// å¼¹å‡ºè¯¥å˜é‡å€¼
 
 	UNLOCK(E)
 
@@ -37,13 +37,13 @@ skynet_setenv(const char *key, const char *value) {
 	LOCK(E)
 	
 	lua_State *L = E->L;
-	lua_getglobal(L, key);		// »ñÈ¡luaÈ«¾Ö±äÁ¿keyµÄÖµ,²¢Ñ¹ÈëluaÕ»
-	assert(lua_isnil(L, -1));	// ¶ÏÑÔ¸Ã±äÁ¿ÖµÒ»¶¨ÊÇ¿ÕµÄ
+	lua_getglobal(L, key);		// è·å–luaå…¨å±€å˜é‡keyçš„å€¼,å¹¶å‹å…¥luaæ ˆ
+	assert(lua_isnil(L, -1));	// æ–­è¨€è¯¥å˜é‡å€¼ä¸€å®šæ˜¯ç©ºçš„
 
-	lua_pop(L,1);				// µ¯³ö¸Ã±äÁ¿Öµ
+	lua_pop(L,1);				// å¼¹å‡ºè¯¥å˜é‡å€¼
 
-	lua_pushstring(L,value);	// ½«valueÑ¹ÈëluaÕ»
-	lua_setglobal(L,key);		// ´ÓluaÕ»ÖĞµ¯³övalue,½«lua±äÁ¿ÖµÉèÎªvalue
+	lua_pushstring(L,value);	// å°†valueå‹å…¥luaæ ˆ
+	lua_setglobal(L,key);		// ä»luaæ ˆä¸­å¼¹å‡ºvalue,å°†luaå˜é‡å€¼è®¾ä¸ºvalue
 
 	UNLOCK(E)
 }

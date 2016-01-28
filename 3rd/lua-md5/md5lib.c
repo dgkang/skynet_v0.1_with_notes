@@ -1,4 +1,4 @@
-/**
+﻿/**
 *  $Id: md5lib.c,v 1.10 2008/05/12 20:51:27 carregal Exp $
 *  Cryptographic and Hash functions for Lua
 *  @author  Roberto Ierusalimschy

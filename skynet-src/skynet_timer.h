@@ -1,4 +1,4 @@
-#ifndef SKYNET_TIMER_H
+﻿#ifndef SKYNET_TIMER_H
 #define SKYNET_TIMER_H
 
 #include <stdint.h>

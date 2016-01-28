@@ -1,23 +1,23 @@
-#ifndef skynet_socket_server_h
+ï»¿#ifndef skynet_socket_server_h
 #define skynet_socket_server_h
 
 #include <stdint.h>
 
-// socket_server_poll·µ»ØµÄsocketÏûÏ¢ÀàĞÍ
-#define SOCKET_DATA 0    // data µ½À´
+// socket_server_pollè¿”å›çš„socketæ¶ˆæ¯ç±»å‹
+#define SOCKET_DATA 0    // data åˆ°æ¥
 #define SOCKET_CLOSE 1   // close conn
 #define SOCKET_OPEN 2    // conn ok
-#define SOCKET_ACCEPT 3  // ±»¶¯Á¬½Ó½¨Á¢ (Accept·µ»ØÁËÁ¬½ÓµÄfd µ«ÊÇÎ´¼ÓÈëepollÀ´¹ÜÀí)
+#define SOCKET_ACCEPT 3  // è¢«åŠ¨è¿æ¥å»ºç«‹ (Acceptè¿”å›äº†è¿æ¥çš„fd ä½†æ˜¯æœªåŠ å…¥epollæ¥ç®¡ç†)
 #define SOCKET_ERROR 4   // error
 #define SOCKET_EXIT 5    // exit
 
 struct socket_server;
 
-// socket_server¶ÔÓ¦µÄmsg
+// socket_serverå¯¹åº”çš„msg
 struct socket_message {
-	int id; 	      // Ó¦ÓÃ²ãµÄsocket fd
-	uintptr_t opaque; // ÔÚskynetÖĞ¶ÔÓ¦Ò»¸öactorÊµÌåµÄhandler
-	int ud;			  // ¶ÔÓÚacceptÁ¬½ÓÀ´ËµÊÇĞÂÁ¬½ÓµÄfd ¶ÔÓÚÊı¾İµ½À´ÊÇÊı¾İµÄ´óĞ¡
+	int id; 	      // åº”ç”¨å±‚çš„socket fd
+	uintptr_t opaque; // åœ¨skynetä¸­å¯¹åº”ä¸€ä¸ªactorå®ä½“çš„handler
+	int ud;			  // å¯¹äºacceptè¿æ¥æ¥è¯´æ˜¯æ–°è¿æ¥çš„fd å¯¹äºæ•°æ®åˆ°æ¥æ˜¯æ•°æ®çš„å¤§å°
 	char * data;
 };
 

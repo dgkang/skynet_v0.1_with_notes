@@ -1,16 +1,16 @@
-#ifndef SKYNET_H
+ï»¿#ifndef SKYNET_H
 #define SKYNET_H
 
 #include <stddef.h>
 #include <stdint.h>
 
-#define PTYPE_TEXT 0    		// ÎÄ±¾Ğ­Òé
+#define PTYPE_TEXT 0    		// æ–‡æœ¬åè®®
 #define PTYPE_RESPONSE 1        // response to client with session, session may be packed into package
 #define PTYPE_MULTICAST 2
-#define PTYPE_CLIENT 3          // ¿Í»§¶ËÏûÏ¢
-#define PTYPE_SYSTEM 4 			// Ğ­Òé¿ØÖÆÃüÁî
-#define PTYPE_HARBOR 5 			// harbor harbor type ¼´Ô¶³ÌÏûÏ¢
-#define PTYPE_SOCKET 6 			// ±¾µØµÄsocketÏûÏ¢
+#define PTYPE_CLIENT 3          // å®¢æˆ·ç«¯æ¶ˆæ¯
+#define PTYPE_SYSTEM 4 			// åè®®æ§åˆ¶å‘½ä»¤
+#define PTYPE_HARBOR 5 			// harbor harbor type å³è¿œç¨‹æ¶ˆæ¯
+#define PTYPE_SOCKET 6 			// æœ¬åœ°çš„socketæ¶ˆæ¯
 
 // read lualib/skynet.lua lualib/simplemonitor.lua
 #define PTYPE_RESERVED_ERROR 7	 // ERRO tell client the session is broken

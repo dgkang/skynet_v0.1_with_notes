@@ -1,4 +1,4 @@
-#ifndef skynet_hashid_h
+ï»¿#ifndef skynet_hashid_h
 #define skynet_hashid_h
 
 #include <assert.h>
@@ -10,9 +10,9 @@ struct hashid_node {
 	struct hashid_node *next;
 };
 
-// hash_id ½á¹¹
+// hash_id ç»“æ„
 struct hashid {
-	int hashmod;			   // ÓÃÓÚ¼ÆËãhashµÄmod
+	int hashmod;			   // ç”¨äºè®¡ç®—hashçš„mod
 	int cap;
 	int count;
 	struct hashid_node *id;

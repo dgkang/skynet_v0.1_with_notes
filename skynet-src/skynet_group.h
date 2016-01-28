@@ -1,4 +1,4 @@
-#ifndef SKYNET_GROUP_H
+﻿#ifndef SKYNET_GROUP_H
 #define SKYNET_GROUP_H
 
 #include <stdint.h>

@@ -1,4 +1,4 @@
-#ifndef socket_poll_h
+﻿#ifndef socket_poll_h
 #define socket_poll_h
 
 #include <stdbool.h>

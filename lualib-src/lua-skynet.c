@@ -1,4 +1,4 @@
-#include "skynet.h"
+﻿#include "skynet.h"
 #include "trace_service.h"
 #include "lua-seri.h"
 #include "service_lua.h"
@@ -514,7 +514,7 @@ _reload(lua_State *L) {
 	return 0;
 }
 
-// skynet�Ľӿ�
+// skynet的接口
 int
 luaopen_skynet_c(lua_State *L) {
 	luaL_checkversion(L);

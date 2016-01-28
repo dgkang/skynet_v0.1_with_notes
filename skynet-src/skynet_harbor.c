@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 #include "skynet_harbor.h"
 #include "skynet_server.h"
 
@@ -6,29 +6,29 @@
 #include <stdio.h>
 #include <assert.h>
 
-// harbor ÓÃÀ´ÓëÔ¶³ÌÖ÷»úÍ¨ĞÅ master Í³Ò»À´¹ÜÀí
+// harbor ç”¨æ¥ä¸è¿œç¨‹ä¸»æœºé€šä¿¡ master ç»Ÿä¸€æ¥ç®¡ç†
 // http://blog.codingnow.com/2012/09/the_design_of_skynet.html
-// Õâ¸öÊÇ skynetµÄÉè¼Æ×ÛÊö ½²ÊöÁË sessionºÍ typeµÄ×÷ÓÃ
+// è¿™ä¸ªæ˜¯ skynetçš„è®¾è®¡ç»¼è¿° è®²è¿°äº† sessionå’Œ typeçš„ä½œç”¨
 
-static struct skynet_context * REMOTE = 0;		// harbor ·şÎñ¶ÔÓ¦µÄ skynet_context Ö¸Õë
+static struct skynet_context * REMOTE = 0;		// harbor æœåŠ¡å¯¹åº”çš„ skynet_context æŒ‡é’ˆ
 static unsigned int HARBOR = 0;
 
 void 
 skynet_harbor_send(struct remote_message *rmsg, uint32_t source, int session) {
-	int type = rmsg->sz >> HANDLE_REMOTE_SHIFT; // ¸ß  8 bite ÓÃÓÚ±£´æ type
+	int type = rmsg->sz >> HANDLE_REMOTE_SHIFT; // é«˜  8 bite ç”¨äºä¿å­˜ type
 	rmsg->sz &= HANDLE_MASK;
 	assert(type != PTYPE_SYSTEM && type != PTYPE_HARBOR);
 	skynet_context_send(REMOTE, rmsg, sizeof(*rmsg) , source, type , session);
 }
 
-// Ïò  master ×¢²á
+// å‘  master æ³¨å†Œ
 void 
 skynet_harbor_register(struct remote_name *rname) {
 	int i;
 	int number = 1;
 	for (i=0; i<GLOBALNAME_LENGTH; i++) {
 		char c = rname->name[i];
-		if (!(c >= '0' && c <='9')) { // È·±£Ô¶³ÌÖ÷»úÃû×ÖÔÚ²»ÔÚ0-9 ·¶Î§ÄÚ
+		if (!(c >= '0' && c <='9')) { // ç¡®ä¿è¿œç¨‹ä¸»æœºåå­—åœ¨ä¸åœ¨0-9 èŒƒå›´å†…
 			number = 0;
 			break;
 		}
@@ -39,14 +39,14 @@ skynet_harbor_register(struct remote_name *rname) {
 }
 
 int 
-skynet_harbor_message_isremote(uint32_t handle) { // ÅĞ¶ÏÏûÏ¢ÊÇ²»ÊÇÀ´×ÔÔ¶³ÌÖ÷»úµÄ
-	int h = (handle & ~HANDLE_MASK); // È¡¸ß8Î»
+skynet_harbor_message_isremote(uint32_t handle) { // åˆ¤æ–­æ¶ˆæ¯æ˜¯ä¸æ˜¯æ¥è‡ªè¿œç¨‹ä¸»æœºçš„
+	int h = (handle & ~HANDLE_MASK); // å–é«˜8ä½
 	return h != HARBOR && h !=0;
 }
 
 void
 skynet_harbor_init(int harbor) {
-	HARBOR = (unsigned int)harbor << HANDLE_REMOTE_SHIFT; // ¸ß8Î»¾ÍÊÇ¶ÔÓ¦Ô¶³ÌÖ÷»úÍ¨ĞÅµÄ harbor
+	HARBOR = (unsigned int)harbor << HANDLE_REMOTE_SHIFT; // é«˜8ä½å°±æ˜¯å¯¹åº”è¿œç¨‹ä¸»æœºé€šä¿¡çš„ harbor
 }
 
 int

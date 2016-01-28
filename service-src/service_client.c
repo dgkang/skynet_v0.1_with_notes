@@ -1,4 +1,4 @@
-#include "skynet.h"
+﻿#include "skynet.h"
 #include "skynet_socket.h"
 
 #include <stdint.h>
@@ -11,7 +11,7 @@ struct client {
 	int id;
 };
 
-// skynet-client �ļ�ʵ��
+// skynet-client 的简单实现
 
 static int
 _cb(struct skynet_context * context, void * ud, int type, int session, uint32_t source, const void * msg, size_t sz) {

@@ -1,7 +1,7 @@
-#ifndef SKYNET_SERVICE_LUA_H
+ï»¿#ifndef SKYNET_SERVICE_LUA_H
 #define SKYNET_SERVICE_LUA_H
 
-// snlua½á¹¹ ÓÃÓÚlua·şÎñ Ã¿Ò»¸ölua·şÎñÊµ¼ÊÉÏÊÇ lua²ãµÄ·şÎñ + c²ãµÄsnlua·şÎñ
+// snluaç»“æ„ ç”¨äºluaæœåŠ¡ æ¯ä¸€ä¸ªluaæœåŠ¡å®é™…ä¸Šæ˜¯ luaå±‚çš„æœåŠ¡ + cå±‚çš„snluaæœåŠ¡
 
 struct snlua {
 	lua_State * L;

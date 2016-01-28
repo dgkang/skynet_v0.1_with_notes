@@ -1,4 +1,4 @@
-#ifndef LUA_SERIALIZE_H
+﻿#ifndef LUA_SERIALIZE_H
 #define LUA_SERIALIZE_H
 
 #include <lua.h>

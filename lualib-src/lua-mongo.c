@@ -1,4 +1,4 @@
-#include <lua.h>
+ï»¿#include <lua.h>
 #include <lauxlib.h>
 
 #include <stdint.h>
@@ -40,7 +40,7 @@ struct buffer {
 	uint8_t buffer[DEFAULT_CAP];
 };
 
-// Ğ¡¶Ë×Ö½ÚĞò
+// å°ç«¯å­—èŠ‚åº
 static inline uint32_t
 little_endian(uint32_t v) {
 	union {
@@ -522,7 +522,7 @@ reply_length(lua_State *L) {
 	return 1;
 }
 
-// lua mongo driver mgdbµÄÇı¶¯
+// lua mongo driver mgdbçš„é©±åŠ¨
 int
 luaopen_mongo_driver(lua_State *L) {
 	luaL_checkversion(L);

@@ -1,33 +1,33 @@
-#ifndef SKYNET_HARBOR_H
+ï»¿#ifndef SKYNET_HARBOR_H
 #define SKYNET_HARBOR_H
 
 #include <stdint.h>
 #include <stdlib.h>
 
-#define GLOBALNAME_LENGTH 16 // È«¾ÖÃû×ÖµÄ³¤¶È
+#define GLOBALNAME_LENGTH 16 // å…¨å±€åå­—çš„é•¿åº¦
 #define REMOTE_MAX 256
 
 // reserve high 8 bits for remote id
-#define HANDLE_MASK 0xffffff   // 24 bits ÕâÀïµÄ handle Ö»Ê¹ÓÃÁË µÍ  24 Î»  ¸ß  8 Î»Áô¸øÔ¶³Ì·şÎñÊ¹ÓÃ ¿ÉÄÜÔÚ·Ö²¼Ê½ÏµÍ³ÖĞ»áÓÃµ½
-#define HANDLE_REMOTE_SHIFT 24 // Ô¶³Ì id ĞèÒªÆ«ÒÆ 24Î»µÃµ½
+#define HANDLE_MASK 0xffffff   // 24 bits è¿™é‡Œçš„ handle åªä½¿ç”¨äº† ä½  24 ä½  é«˜  8 ä½ç•™ç»™è¿œç¨‹æœåŠ¡ä½¿ç”¨ å¯èƒ½åœ¨åˆ†å¸ƒå¼ç³»ç»Ÿä¸­ä¼šç”¨åˆ°
+#define HANDLE_REMOTE_SHIFT 24 // è¿œç¨‹ id éœ€è¦åç§» 24ä½å¾—åˆ°
 
-// Ô¶³Ì·şÎñÃûºÍ¶ÔÓ¦µÄhandle
+// è¿œç¨‹æœåŠ¡åå’Œå¯¹åº”çš„handle
 struct remote_name {
 	char name[GLOBALNAME_LENGTH];
 	uint32_t handle;
 };
 
-// Ô¶³ÌÏûÏ¢
+// è¿œç¨‹æ¶ˆæ¯
 struct remote_message {
 	struct remote_name destination;
 	const void * message;
 	size_t sz;
 };
 
-// ÏòÔ¶³Ì·şÎñ·¢ËÍÏûÏ¢
+// å‘è¿œç¨‹æœåŠ¡å‘é€æ¶ˆæ¯
 void skynet_harbor_send(struct remote_message *rmsg, uint32_t source, int session);
 
-// Ïòmaster×¢²á·şÎñÃû masterÓÃÀ´Í³Ò»¹ÜÀíËùÒÔ½Úµã
+// å‘masteræ³¨å†ŒæœåŠ¡å masterç”¨æ¥ç»Ÿä¸€ç®¡ç†æ‰€ä»¥èŠ‚ç‚¹
 void skynet_harbor_register(struct remote_name *rname);
 
 int skynet_harbor_message_isremote(uint32_t handle);

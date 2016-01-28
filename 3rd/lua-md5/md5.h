@@ -1,4 +1,4 @@
-/**
+﻿/**
 *  $Id: md5.h,v 1.2 2006/03/03 15:04:49 tomas Exp $
 *  Cryptographic module for Lua.
 *  @author  Roberto Ierusalimschy

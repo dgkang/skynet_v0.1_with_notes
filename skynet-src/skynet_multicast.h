@@ -1,4 +1,4 @@
-#ifndef SKYNET_MULTICAST_H
+﻿#ifndef SKYNET_MULTICAST_H
 #define SKYNET_MULTICAST_H
 
 #include <stddef.h>

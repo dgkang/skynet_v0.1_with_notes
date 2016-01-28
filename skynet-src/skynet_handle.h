@@ -1,4 +1,4 @@
-#ifndef SKYNET_CONTEXT_HANDLE_H
+﻿#ifndef SKYNET_CONTEXT_HANDLE_H
 #define SKYNET_CONTEXT_HANDLE_H
 
 #include <stdint.h>

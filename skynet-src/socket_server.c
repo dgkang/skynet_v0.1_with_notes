@@ -1,4 +1,4 @@
-#include "socket_server.h"
+ï»¿#include "socket_server.h"
 #include "socket_poll.h"
 
 #include <sys/types.h>
@@ -15,55 +15,55 @@
 #define MAX_INFO 128		     // MAX_SOCKET will be 2^MAX_SOCKET_P
 
 #define MAX_SOCKET_P 16
-#define MAX_EVENT 64          	 // ÓÃÓÚepoll_waitµÄµÚÈı¸ö²ÎÊı Ã¿´Î·µ»ØÊÂ¼şµÄ¶àÉÙ
-#define MIN_READ_BUFFER 64    	 // ×îĞ¡·ÖÅäµÄ¶Á»º³å´óĞ¡ ÎªÁË¼õÉÙreadµÄµ÷ÓÃ ¾¡¿ÉÄÜ·ÖÅä´óµÄ¶Á»º³åÇø muduoÊÇÓÃÁËreavÀ´¼õÉÙreadÏµÍ³µ÷ÓÃ´ÎÊıµÄ Ëü¿ÉÒÔ×¼±¸¶à¿é»º³åÇø
-#define SOCKET_TYPE_INVALID 0 	 // ÎŞĞ§µÄsock fe
-#define SOCKET_TYPE_RESERVE 1 	 // Ô¤ÁôÒÑ¾­±»ÉêÇë ¼´½«±»Ê¹ÓÃ
-#define SOCKET_TYPE_PLISTEN 2 	 // listen fdµ«ÊÇÎ´¼ÓÈëepoll¹ÜÀí
-#define SOCKET_TYPE_LISTEN 3     // ¼àÌıµ½Ì×½Ó×ÖÒÑ¾­¼ÓÈëepoll¹ÜÀí
-#define SOCKET_TYPE_CONNECTING 4 // ³¢ÊÔÁ¬½ÓµÄsocket fd
-#define SOCKET_TYPE_CONNECTED 5  // ÒÑ¾­½¨Á¢Á¬½ÓµÄsocket Ö÷¶¯conn»òÕß±»¶¯acceptµÄÌ×½Ó×Ö ÒÑ¾­¼ÓÈëepoll¹ÜÀí
-#define SOCKET_TYPE_HALFCLOSE 6  // ÒÑ¾­ÔÚÓ¦ÓÃ²ã¹Ø±ÕÁËfd µ«ÊÇÊı¾İ»¹Ã»ÓĞ·¢ËÍÍê »¹Ã»ÓĞclose
-#define SOCKET_TYPE_PACCEPT 7    // accept·µ»ØµÄfd Î´¼ÓÈëepoll
-#define SOCKET_TYPE_BIND 8       // ÆäËûÀàĞÍµÄfd Èç stdin stdoutµÈ
+#define MAX_EVENT 64          	 // ç”¨äºepoll_waitçš„ç¬¬ä¸‰ä¸ªå‚æ•° æ¯æ¬¡è¿”å›äº‹ä»¶çš„å¤šå°‘
+#define MIN_READ_BUFFER 64    	 // æœ€å°åˆ†é…çš„è¯»ç¼“å†²å¤§å° ä¸ºäº†å‡å°‘readçš„è°ƒç”¨ å°½å¯èƒ½åˆ†é…å¤§çš„è¯»ç¼“å†²åŒº muduoæ˜¯ç”¨äº†reavæ¥å‡å°‘readç³»ç»Ÿè°ƒç”¨æ¬¡æ•°çš„ å®ƒå¯ä»¥å‡†å¤‡å¤šå—ç¼“å†²åŒº
+#define SOCKET_TYPE_INVALID 0 	 // æ— æ•ˆçš„sock fe
+#define SOCKET_TYPE_RESERVE 1 	 // é¢„ç•™å·²ç»è¢«ç”³è¯· å³å°†è¢«ä½¿ç”¨
+#define SOCKET_TYPE_PLISTEN 2 	 // listen fdä½†æ˜¯æœªåŠ å…¥epollç®¡ç†
+#define SOCKET_TYPE_LISTEN 3     // ç›‘å¬åˆ°å¥—æ¥å­—å·²ç»åŠ å…¥epollç®¡ç†
+#define SOCKET_TYPE_CONNECTING 4 // å°è¯•è¿æ¥çš„socket fd
+#define SOCKET_TYPE_CONNECTED 5  // å·²ç»å»ºç«‹è¿æ¥çš„socket ä¸»åŠ¨connæˆ–è€…è¢«åŠ¨acceptçš„å¥—æ¥å­— å·²ç»åŠ å…¥epollç®¡ç†
+#define SOCKET_TYPE_HALFCLOSE 6  // å·²ç»åœ¨åº”ç”¨å±‚å…³é—­äº†fd ä½†æ˜¯æ•°æ®è¿˜æ²¡æœ‰å‘é€å®Œ è¿˜æ²¡æœ‰close
+#define SOCKET_TYPE_PACCEPT 7    // acceptè¿”å›çš„fd æœªåŠ å…¥epoll
+#define SOCKET_TYPE_BIND 8       // å…¶ä»–ç±»å‹çš„fd å¦‚ stdin stdoutç­‰
 
 #define MAX_SOCKET (1<<MAX_SOCKET_P) // 1 << 16 -> 64K
 
-// ·¢ËÍ»º³åÇø¹¹³ÉÒ»¸öÁ´±í
+// å‘é€ç¼“å†²åŒºæ„æˆä¸€ä¸ªé“¾è¡¨
 struct write_buffer {
 	struct write_buffer * next;
-	char *ptr; // Ö¸Ïòµ±Ç°Î´·¢ËÍµÄÊı¾İÊ×²¿
+	char *ptr; // æŒ‡å‘å½“å‰æœªå‘é€çš„æ•°æ®é¦–éƒ¨
 	int sz;
 	void *buffer;
 };
 
-// Ó¦ÓÃ²ãµÄsocket
+// åº”ç”¨å±‚çš„socket
 struct socket {
-	int fd;   			// ¶ÔÓ¦ÄÚºË·ÖÅäµÄfd
-	int id;   			// Ó¦ÓÃ²ãÎ¬»¤µÄÒ»¸öÓëfd¶ÔÓ¦µÄid Êµ¼ÊÉÏÊÇÔÚsocket³ØÖĞµÄid
-	int type; 			// socketÀàĞÍ»òÕß×´Ì¬
-	int size; 			// ÏÂÒ»´Îread²Ù×÷Òª·ÖÅäµÄ»º³åÇø´óĞ¡
-	int64_t wb_size;    // ·¢ËÍ»º³åÇøÎ´·¢ËÍµÄÊı¾İ
-	uintptr_t opaque;   // ÔÚskynetÖĞÓÃÓÚ±£´æ·şÎñµÄhandle
-	struct write_buffer * head; // ·¢ËÍ»º³åÇøÁ´±íÍ·Ö¸ÕëºÍÎ²Ö¸Õë
+	int fd;   			// å¯¹åº”å†…æ ¸åˆ†é…çš„fd
+	int id;   			// åº”ç”¨å±‚ç»´æŠ¤çš„ä¸€ä¸ªä¸fdå¯¹åº”çš„id å®é™…ä¸Šæ˜¯åœ¨socketæ± ä¸­çš„id
+	int type; 			// socketç±»å‹æˆ–è€…çŠ¶æ€
+	int size; 			// ä¸‹ä¸€æ¬¡readæ“ä½œè¦åˆ†é…çš„ç¼“å†²åŒºå¤§å°
+	int64_t wb_size;    // å‘é€ç¼“å†²åŒºæœªå‘é€çš„æ•°æ®
+	uintptr_t opaque;   // åœ¨skynetä¸­ç”¨äºä¿å­˜æœåŠ¡çš„handle
+	struct write_buffer * head; // å‘é€ç¼“å†²åŒºé“¾è¡¨å¤´æŒ‡é’ˆå’Œå°¾æŒ‡é’ˆ
 	struct write_buffer * tail; //
 };
 
 struct socket_server {
-	int recvctrl_fd;  				// ¹ÜµÀ¶Á¶Ë
-	int sendctrl_fd;                // ¹ÜµÀĞ´¶Ë
-	int checkctrl; 					// ÊÍ·Å¼ì²âÃüÁî
+	int recvctrl_fd;  				// ç®¡é“è¯»ç«¯
+	int sendctrl_fd;                // ç®¡é“å†™ç«¯
+	int checkctrl; 					// é‡Šæ”¾æ£€æµ‹å‘½ä»¤
 	poll_fd event_fd;               // epoll fd
-	int alloc_id;                   // Ó¦ÓÃ²ã·ÖÅäid ÓÃµÄ
-	int event_n;      				// epoll_wait ·µ»ØµÄÊÂ¼şÊı
-	int event_index;  				// µ±Ç°´¦ÀíµÄÊÂ¼şĞòºÅ
-	struct event ev[MAX_EVENT];     // epoll_wait·µ»ØµÄÊÂ¼ş¼¯
-	struct socket slot[MAX_SOCKET]; // Ó¦ÓÃ²ãÔ¤ÏÈ·ÖÅäµÄsocket
-	char buffer[MAX_INFO];          // ÁÙÊ±Êı¾İµÄ±£´æ ±ÈÈç±£´æ¶ÔµÈ·½µÄµØÖ·ĞÅÏ¢µÈ
-	fd_set rfds; 					// ÓÃÓÚselectµÄfd¼¯
+	int alloc_id;                   // åº”ç”¨å±‚åˆ†é…id ç”¨çš„
+	int event_n;      				// epoll_wait è¿”å›çš„äº‹ä»¶æ•°
+	int event_index;  				// å½“å‰å¤„ç†çš„äº‹ä»¶åºå·
+	struct event ev[MAX_EVENT];     // epoll_waitè¿”å›çš„äº‹ä»¶é›†
+	struct socket slot[MAX_SOCKET]; // åº”ç”¨å±‚é¢„å…ˆåˆ†é…çš„socket
+	char buffer[MAX_INFO];          // ä¸´æ—¶æ•°æ®çš„ä¿å­˜ æ¯”å¦‚ä¿å­˜å¯¹ç­‰æ–¹çš„åœ°å€ä¿¡æ¯ç­‰
+	fd_set rfds; 					// ç”¨äºselectçš„fdé›†
 };
 
-// ÒÔÏÂ6¸ö½á¹¹ÓÃÓÚ¿ØÖÆ°üÌå½á¹¹
+// ä»¥ä¸‹6ä¸ªç»“æ„ç”¨äºæ§åˆ¶åŒ…ä½“ç»“æ„
 struct request_open {
 	int id;
 	int port;
@@ -100,9 +100,9 @@ struct request_start {
 	uintptr_t opaque;
 };
 
-// ¿ØÖÆÃüÁîÇëÇó°ü
+// æ§åˆ¶å‘½ä»¤è¯·æ±‚åŒ…
 struct request_package {
-	uint8_t header[8];	// 6 bytes dummy 6¸ö×Ö½ÚÎ´ÓÃ [0-5] [6]ÊÇtype [7]³¤¶È ³¤¶ÈÖ¸µÄÊÇ°üÌåµÄ³¤¶È
+	uint8_t header[8];	// 6 bytes dummy 6ä¸ªå­—èŠ‚æœªç”¨ [0-5] [6]æ˜¯type [7]é•¿åº¦ é•¿åº¦æŒ‡çš„æ˜¯åŒ…ä½“çš„é•¿åº¦
 	union {
 		char buffer[256];
 		struct request_open open;
@@ -130,21 +130,21 @@ socket_keepalive(int fd) {
 	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepalive , sizeof(keepalive));  
 }
 
-// ´Ósocket³ØÖĞ»ñÈ¡Ò»¸ö¿ÕµÄsocket ²¢ÎªÆä·ÖÅäÒ»¸öid 2^31-1
-// ÔÚsocket³ØÖĞµÄÎ»ÖÃ ³ØµÄ´óĞ¡ÊÇ64K socket_idµÄ·¶Î§Ô¶´óÓë64K
+// ä»socketæ± ä¸­è·å–ä¸€ä¸ªç©ºçš„socket å¹¶ä¸ºå…¶åˆ†é…ä¸€ä¸ªid 2^31-1
+// åœ¨socketæ± ä¸­çš„ä½ç½® æ± çš„å¤§å°æ˜¯64K socket_idçš„èŒƒå›´è¿œå¤§ä¸64K
 static int
 reserve_id(struct socket_server *ss) {
 	int i;
 	for (i=0;i<MAX_SOCKET;i++) {
-		int id = __sync_add_and_fetch(&(ss->alloc_id), 1); // Ô­×ÓµÄ++
-		// Ğ¡ÓÚ0 ÒÑ¾­×î´óÁË ËµÃ÷ ´Ó0¿ªÊ¼
+		int id = __sync_add_and_fetch(&(ss->alloc_id), 1); // åŸå­çš„++
+		// å°äº0 å·²ç»æœ€å¤§äº† è¯´æ˜ ä»0å¼€å§‹
 		if (id < 0) {
 			id = __sync_and_and_fetch(&(ss->alloc_id), 0x7fffffff);
 		}
-		struct socket *s = &ss->slot[id % MAX_SOCKET];// ´Ósocket³ØÖĞÈ¡³ösocket
+		struct socket *s = &ss->slot[id % MAX_SOCKET];// ä»socketæ± ä¸­å–å‡ºsocket
 		if (s->type == SOCKET_TYPE_INVALID) {
-			// Èç¹ûÏàµÈ¾Í½»»»³É SOCKET_TYPE_RESERVE ÉèÖÃÎªÒÑÓÃ
-			// ÕâÀïÓÉÓÚÃ»ÓĞ¼ÓËø ¿ÉÄÜ¶à¸öÏß³Ì²Ù×÷ ËùÒÔ»¹ĞèÒªÅĞ¶ÏÒ»´Î
+			// å¦‚æœç›¸ç­‰å°±äº¤æ¢æˆ SOCKET_TYPE_RESERVE è®¾ç½®ä¸ºå·²ç”¨
+			// è¿™é‡Œç”±äºæ²¡æœ‰åŠ é” å¯èƒ½å¤šä¸ªçº¿ç¨‹æ“ä½œ æ‰€ä»¥è¿˜éœ€è¦åˆ¤æ–­ä¸€æ¬¡
 			if (__sync_bool_compare_and_swap(&s->type, SOCKET_TYPE_INVALID, SOCKET_TYPE_RESERVE)) {
 				return id;
 			}
@@ -166,14 +166,14 @@ socket_server_create() {
 		return NULL;
 	}
 
-	// ´´½¨Ò»¸ö¹ÜµÀ
+	// åˆ›å»ºä¸€ä¸ªç®¡é“
 	if (pipe(fd)) {
 		sp_release(efd);
 		fprintf(stderr, "socket-server: create socket pair failed.\n");
 		return NULL;
 	}
 
-	// epoll¹Ø×¢¹ÜµÀ¶Á¶ËµÄ¿É¶ÁÊÂ¼ş
+	// epollå…³æ³¨ç®¡é“è¯»ç«¯çš„å¯è¯»äº‹ä»¶
 	if (sp_add(efd, fd[0], NULL)) {
 		// add recvctrl_fd to event poll
 		fprintf(stderr, "socket-server: can't add server fd to event pool.\n");
@@ -185,11 +185,11 @@ socket_server_create() {
 
 	struct socket_server *ss = MALLOC(sizeof(*ss));
 	ss->event_fd = efd;
-	ss->recvctrl_fd = fd[0]; // ¹ÜµÀ¶Á¶Ë
-	ss->sendctrl_fd = fd[1]; // ¹ÜµÀĞ´¶Ë
+	ss->recvctrl_fd = fd[0]; // ç®¡é“è¯»ç«¯
+	ss->sendctrl_fd = fd[1]; // ç®¡é“å†™ç«¯
 	ss->checkctrl = 1;
 
-	// ³õÊ¼»¯64K¸ösocket
+	// åˆå§‹åŒ–64Kä¸ªsocket
 	for (i=0;i<MAX_SOCKET;i++) {
 		struct socket *s = &ss->slot[i];
 		s->type = SOCKET_TYPE_INVALID;
@@ -199,7 +199,7 @@ socket_server_create() {
 	ss->alloc_id = 0;
 	ss->event_n = 0;
 	ss->event_index = 0;
-	FD_ZERO(&ss->rfds); // ÓÃÓÚselectµÄfdÖÃÎª¿Õ Ö÷ÒªÊÇÓÃÓÚÃüÁîÍ¨µÀ
+	FD_ZERO(&ss->rfds); // ç”¨äºselectçš„fdç½®ä¸ºç©º ä¸»è¦æ˜¯ç”¨äºå‘½ä»¤é€šé“
 	assert(ss->recvctrl_fd < FD_SETSIZE);
 
 	return ss;
@@ -220,14 +220,14 @@ force_close(struct socket_server *ss, struct socket *s, struct socket_message *r
 	while (wb) {
 		struct write_buffer *tmp = wb;
 		wb = wb->next;
-		FREE(tmp->buffer); // ÊÍ·Å½ÚµãÖ¸ÏòµÄÄÚ´æ
-		FREE(tmp); // ÊÍ·Å½Úµã±¾Éí
+		FREE(tmp->buffer); // é‡Šæ”¾èŠ‚ç‚¹æŒ‡å‘çš„å†…å­˜
+		FREE(tmp); // é‡Šæ”¾èŠ‚ç‚¹æœ¬èº«
 	}
 	s->head = s->tail = NULL;
 
-	// Ç¿ÖÆ¹Ø±ÕµÄÊ±ºò Èç¹ûtype²»ÎªSOCKET_TYPE_PACCEPT SOCKET_TYPE_PACCEPTÕâ2¸öÊÇÃ»ÓĞ¼ÓÈëepoll¹ÜÀíµÄ
+	// å¼ºåˆ¶å…³é—­çš„æ—¶å€™ å¦‚æœtypeä¸ä¸ºSOCKET_TYPE_PACCEPT SOCKET_TYPE_PACCEPTè¿™2ä¸ªæ˜¯æ²¡æœ‰åŠ å…¥epollç®¡ç†çš„
 	if (s->type != SOCKET_TYPE_PACCEPT && s->type != SOCKET_TYPE_PACCEPT) {
-		sp_del(ss->event_fd, s->fd); // ´ÓepollÖĞÈ¡Ïû¹Ø×¢fd
+		sp_del(ss->event_fd, s->fd); // ä»epollä¸­å–æ¶ˆå…³æ³¨fd
 	}
 	if (s->type != SOCKET_TYPE_BIND) {
 		close(s->fd);
@@ -235,7 +235,7 @@ force_close(struct socket_server *ss, struct socket *s, struct socket_message *r
 	s->type = SOCKET_TYPE_INVALID;
 }
 
-// ×ÊÔ´ÊÍ·Å
+// èµ„æºé‡Šæ”¾
 void 
 socket_server_release(struct socket_server *ss) {
 	int i;
@@ -246,20 +246,20 @@ socket_server_release(struct socket_server *ss) {
 			force_close(ss, s , &dummy);
 		}
 	}
-	close(ss->sendctrl_fd); // ¹Ø±Õ¹ÜµÀ
+	close(ss->sendctrl_fd); // å…³é—­ç®¡é“
 	close(ss->recvctrl_fd);
 	sp_release(ss->event_fd); // free event fd
 	FREE(ss);
 }
 
-// ´Ósocket³ØÖĞ·ÖÅäÒ»¸öfd³öÀ´
+// ä»socketæ± ä¸­åˆ†é…ä¸€ä¸ªfdå‡ºæ¥
 static struct socket *
 new_fd(struct socket_server *ss, int id, int fd, uintptr_t opaque, bool add) {
 	struct socket * s = &ss->slot[id % MAX_SOCKET];
 	assert(s->type == SOCKET_TYPE_RESERVE);
 
 	if (add) {
-		if (sp_add(ss->event_fd, fd, s)) { // ¼ÓÈëµ½epollÀ´¹ÜÀíÕâ¸öfd
+		if (sp_add(ss->event_fd, fd, s)) { // åŠ å…¥åˆ°epollæ¥ç®¡ç†è¿™ä¸ªfd
 			s->type = SOCKET_TYPE_INVALID;
 			return NULL;
 		}
@@ -295,7 +295,7 @@ open_socket(struct socket_server *ss, struct request_open * request, struct sock
 	ai_hints.ai_socktype = SOCK_STREAM;
 	ai_hints.ai_protocol = IPPROTO_TCP;
 
-	// getaddrinfoÖ§³Öipv6
+	// getaddrinfoæ”¯æŒipv6
 	status = getaddrinfo( request->host, port, &ai_hints, &ai_list );
 	if ( status != 0 ) {
 		goto _failed;
@@ -343,7 +343,7 @@ open_socket(struct socket_server *ss, struct request_open * request, struct sock
 		freeaddrinfo( ai_list );
 		return SOCKET_OPEN;
 	} else {
-		ns->type = SOCKET_TYPE_CONNECTING; // ·Ç×èÈûÌ×½Ó×Ö´¦ÓÚÁ¬½ÓÖĞ Ó¦¸Ã¹Ø×¢ËüµÄ¿ÉĞ´ÊÂ¼şepoll¹Ø×¢ËüÊÇ·ñÁ¬½Ó³É¹¦
+		ns->type = SOCKET_TYPE_CONNECTING; // éé˜»å¡å¥—æ¥å­—å¤„äºè¿æ¥ä¸­ åº”è¯¥å…³æ³¨å®ƒçš„å¯å†™äº‹ä»¶epollå…³æ³¨å®ƒæ˜¯å¦è¿æ¥æˆåŠŸ
 		sp_write(ss->event_fd, ns->fd, ns, true);
 	}
 
@@ -384,9 +384,9 @@ send_buffer(struct socket_server *ss, struct socket *s, struct socket_message *r
 		FREE(tmp);
 	}
 	s->tail = NULL;
-	sp_write(ss->event_fd, s->fd, s, false); // È¡Ïû¹Ø×¢
+	sp_write(ss->event_fd, s->fd, s, false); // å–æ¶ˆå…³æ³¨
 
-	// ÕâÀï ÔÚ¹Ø±ÕµÄÊ±ºò ´¦Àí²»¹»ÍêÉÆ ÒòÎªµÚ¶ş´Î·¢ËÍµÄÊ±ºòÖ±½Ó¹Ø±ÕÁËsocket Ã»ÓĞ¼ÌĞø·¢ËÍÍê±Ï ËùÒÔskynet²»ÊÊºÏ´óÁ÷Á¿µÄÍøÂçÓ¦ÓÃ
+	// è¿™é‡Œ åœ¨å…³é—­çš„æ—¶å€™ å¤„ç†ä¸å¤Ÿå®Œå–„ å› ä¸ºç¬¬äºŒæ¬¡å‘é€çš„æ—¶å€™ç›´æ¥å…³é—­äº†socket æ²¡æœ‰ç»§ç»­å‘é€å®Œæ¯• æ‰€ä»¥skynetä¸é€‚åˆå¤§æµé‡çš„ç½‘ç»œåº”ç”¨
 	if (s->type == SOCKET_TYPE_HALFCLOSE) {
 		force_close(ss, s, result);
 		return SOCKET_CLOSE;
@@ -424,13 +424,13 @@ send_socket(struct socket_server *ss, struct request_send * request, struct sock
 		return -1;
 	}
 	assert(s->type != SOCKET_TYPE_PLISTEN && s->type != SOCKET_TYPE_LISTEN);
-	// Ó¦ÓÃ²ã»º³åÇø Ã»ÓĞÊı¾İÖ±½Ó·¢ËÍ
+	// åº”ç”¨å±‚ç¼“å†²åŒº æ²¡æœ‰æ•°æ®ç›´æ¥å‘é€
 	if (s->head == NULL) {
 		int n = write(s->fd, request->buffer, request->sz);
 		if (n<0) {
 			switch(errno) {
 			case EINTR:
-			case EAGAIN: // ÄÚºË»º³åÇøÂúÁË
+			case EAGAIN: // å†…æ ¸ç¼“å†²åŒºæ»¡äº†
 				n = 0;
 				break;
 			default:
@@ -439,15 +439,15 @@ send_socket(struct socket_server *ss, struct request_send * request, struct sock
 				return SOCKET_CLOSE;
 			}
 		}
-		// ¿ÉÒÔ°ÑÊı¾İ¿½±´µ½ÄÚºË»º³åÇøÖĞ
+		// å¯ä»¥æŠŠæ•°æ®æ‹·è´åˆ°å†…æ ¸ç¼“å†²åŒºä¸­
 		if (n == request->sz) {
 			FREE(request->buffer);
 			return -1;
 		}
-		// ½«Î´·¢ËÍµÄ²¿·ÖÌí¼Óµ½Ó¦ÓÃ²ã»º³åÇøÖĞ ¹Ø×¢¿ÉĞ´ÊÂ¼ş
+		// å°†æœªå‘é€çš„éƒ¨åˆ†æ·»åŠ åˆ°åº”ç”¨å±‚ç¼“å†²åŒºä¸­ å…³æ³¨å¯å†™äº‹ä»¶
 		append_sendbuffer(s, request, n);
 		sp_write(ss->event_fd, s->fd, s, true);
-	} else { // ½«Î´·¢ËÍµÄÊı¾İÌí¼Óµ½Ó¦ÓÃ²ã»º³åÇø Ó¦ÓÃ²ã»º³åÇøÒÑ¾­ÓĞÊı¾İÁË
+	} else { // å°†æœªå‘é€çš„æ•°æ®æ·»åŠ åˆ°åº”ç”¨å±‚ç¼“å†²åŒº åº”ç”¨å±‚ç¼“å†²åŒºå·²ç»æœ‰æ•°æ®äº†
 		append_sendbuffer(s, request, 0);
 	}
 	return -1;
@@ -457,7 +457,7 @@ static int
 listen_socket(struct socket_server *ss, struct request_listen * request, struct socket_message *result) {
 	int id = request->id;
 	int listen_fd = request->fd;
-	struct socket *s = new_fd(ss, id, listen_fd, request->opaque, false); // Ã»ÓĞ¼ÓÈëepoll
+	struct socket *s = new_fd(ss, id, listen_fd, request->opaque, false); // æ²¡æœ‰åŠ å…¥epoll
 	if (s == NULL) {
 		goto _failed;
 	}
@@ -486,7 +486,7 @@ close_socket(struct socket_server *ss, struct request_close *request, struct soc
 		return SOCKET_CLOSE;
 	}
 	if (s->head) { 
-		int type = send_buffer(ss,s,result); // ¹Ø±ÕsocketµÄÊ±ºò Èç¹ûÓĞÎ´·¢ËÍµÄÊı¾İ ÏÈ·¢ËÍ³öÈ¥
+		int type = send_buffer(ss,s,result); // å…³é—­socketçš„æ—¶å€™ å¦‚æœæœ‰æœªå‘é€çš„æ•°æ® å…ˆå‘é€å‡ºå»
 		if (type != -1)
 			return type;
 	}
@@ -562,7 +562,7 @@ block_readpipe(int pipefd, void *buffer, int sz) {
 	}
 }
 
-// ÅĞ¶Ï¹ÜµÀÊÇ·ñÓĞÃüÃû Ê¹ÓÃselectÀ´¹ÜÀí Ã»ÓĞÊ¹ÓÃepollÊ±ÎªÁËÌá¸ßÃüÁîµÄ¼ì²âÆµÂÊ
+// åˆ¤æ–­ç®¡é“æ˜¯å¦æœ‰å‘½å ä½¿ç”¨selectæ¥ç®¡ç† æ²¡æœ‰ä½¿ç”¨epollæ—¶ä¸ºäº†æé«˜å‘½ä»¤çš„æ£€æµ‹é¢‘ç‡
 static int
 has_cmd(struct socket_server *ss) {
 	struct timeval tv = {0,0};
@@ -578,7 +578,7 @@ has_cmd(struct socket_server *ss) {
 }
 
 // return type
-// ÓĞÃüÁî °ÑÃüÁî½âÎö³öÀ´ ¸ù¾İÏàÓ¦µÄÀàĞÍµ÷ÓÃÏàÓ¦µÄº¯Êı
+// æœ‰å‘½ä»¤ æŠŠå‘½ä»¤è§£æå‡ºæ¥ æ ¹æ®ç›¸åº”çš„ç±»å‹è°ƒç”¨ç›¸åº”çš„å‡½æ•°
 
 static int
 ctrl_cmd(struct socket_server *ss, struct socket_message *result) {
@@ -645,7 +645,7 @@ forward_message(struct socket_server *ss, struct socket *s, struct socket_messag
 		return SOCKET_CLOSE;
 	}
 
-	// half close °ë¹Ø±Õ¶ªµôÏûÏ¢
+	// half close åŠå…³é—­ä¸¢æ‰æ¶ˆæ¯
 	if (s->type == SOCKET_TYPE_HALFCLOSE) {
 		// discard recv data
 		FREE(buffer);
@@ -665,7 +665,7 @@ forward_message(struct socket_server *ss, struct socket *s, struct socket_messag
 	return SOCKET_DATA;
 }
 
-// ³¢ÊÔÁ¬½ÓÖĞµÄÌ×½Ó×Ö¿ÉĞ´ÊÂ¼ş ¿ÉÄÜÊ§°Ü
+// å°è¯•è¿æ¥ä¸­çš„å¥—æ¥å­—å¯å†™äº‹ä»¶ å¯èƒ½å¤±è´¥
 static int
 report_connect(struct socket_server *ss, struct socket *s, struct socket_message *result) {
 	int error;
@@ -679,7 +679,7 @@ report_connect(struct socket_server *ss, struct socket *s, struct socket_message
 		result->opaque = s->opaque;
 		result->id = s->id;
 		result->ud = 0;
-		sp_write(ss->event_fd, s->fd, s, false); //  È¡Ïû¹Ø×¢¿ÉĞ´ÊÂ¼ş
+		sp_write(ss->event_fd, s->fd, s, false); //  å–æ¶ˆå…³æ³¨å¯å†™äº‹ä»¶
 		union sockaddr_all u;
 		socklen_t slen = sizeof(u);
 		if (getpeername(s->fd, &u.s, &slen) == 0) {
@@ -721,7 +721,7 @@ report_accept(struct socket_server *ss, struct socket *s, struct socket_message 
 	result->ud = id;
 	result->data = NULL;
 
-	// ½«¶ÔµÈ·½µÄip port±£´æÏÂÀ´
+	// å°†å¯¹ç­‰æ–¹çš„ip portä¿å­˜ä¸‹æ¥
 	void * sin_addr = (u.s.sa_family == AF_INET) ? (void*)&u.v4.sin_addr : (void *)&u.v6.sin6_addr;
 	if (inet_ntop(u.s.sa_family, sin_addr, ss->buffer, sizeof(ss->buffer))) {
 		result->data = ss->buffer;
@@ -732,13 +732,13 @@ report_accept(struct socket_server *ss, struct socket *s, struct socket_message 
 
 
 // return type
-// ÓĞÃüÁîµÄ»° ÓÅÏÈ¼ì²âÃüÁî// Ã»ÓĞÃüÁîµÄÊ±ºò
+// æœ‰å‘½ä»¤çš„è¯ ä¼˜å…ˆæ£€æµ‹å‘½ä»¤// æ²¡æœ‰å‘½ä»¤çš„æ—¶å€™
 int 
 socket_server_poll(struct socket_server *ss, struct socket_message * result, int * more) {
 	for (;;) {
 		if (ss->checkctrl) {
-			if (has_cmd(ss)) { // has_cmdÄÚ²¿µ÷ÓÃselectº¯Êı ÅĞ¶Ï¹ÜµÀÊÇ·ñÓĞÃüÁî  Ê¹ÓÃselectÀ´¹ÜÀí Ã»ÓĞÊ¹ÓÃepollÊ±ÎªÁËÌá¸ßÃüÁîµÄ¼ì²âÆµÂÊ
-				int type = ctrl_cmd(ss, result); // ´¦ÀíÃüÁî
+			if (has_cmd(ss)) { // has_cmdå†…éƒ¨è°ƒç”¨selectå‡½æ•° åˆ¤æ–­ç®¡é“æ˜¯å¦æœ‰å‘½ä»¤  ä½¿ç”¨selectæ¥ç®¡ç† æ²¡æœ‰ä½¿ç”¨epollæ—¶ä¸ºäº†æé«˜å‘½ä»¤çš„æ£€æµ‹é¢‘ç‡
+				int type = ctrl_cmd(ss, result); // å¤„ç†å‘½ä»¤
 				if (type != -1)
 					return type;
 				else
@@ -748,7 +748,7 @@ socket_server_poll(struct socket_server *ss, struct socket_message * result, int
 				ss->checkctrl = 0;
 			}
 		}
-		if (ss->event_index == ss->event_n) { // µ±Ç°µÄ´¦ÀíĞòºÅ×î´óÁË ¼´´¦ÀíÍêÁË ¼ÌĞøµÈ´ıÊÂ¼şµÄµ½À´
+		if (ss->event_index == ss->event_n) { // å½“å‰çš„å¤„ç†åºå·æœ€å¤§äº† å³å¤„ç†å®Œäº† ç»§ç»­ç­‰å¾…äº‹ä»¶çš„åˆ°æ¥
 			ss->event_n = sp_wait(ss->event_fd, ss->ev, MAX_EVENT);
 			ss->checkctrl = 1;
 			if (more) {
@@ -778,13 +778,13 @@ socket_server_poll(struct socket_server *ss, struct socket_message * result, int
 			fprintf(stderr, "socket-server: invalid socket\n");
 			break;
 		default:
-			if (e->write) { // ¿ÉĞ´ÊÂ¼ş ´ÓÓ¦ÓÃ²ã¶ÁÈ¡Êı¾İ
+			if (e->write) { // å¯å†™äº‹ä»¶ ä»åº”ç”¨å±‚è¯»å–æ•°æ®
 				int type = send_buffer(ss, s, result);
 				if (type == -1)
 					break;
 				return type;
 			}
-			if (e->read) { // ¿É¶ÁÊÂ¼ş ¶ÁÈ¡ÏûÏ¢
+			if (e->read) { // å¯è¯»äº‹ä»¶ è¯»å–æ¶ˆæ¯
 				int type = forward_message(ss, s, result);
 				if (type == -1)
 					break;
@@ -795,13 +795,13 @@ socket_server_poll(struct socket_server *ss, struct socket_message * result, int
 	}
 }
 
-// Ïò¹ÜµÀµÄĞ´¶ËĞ´ÈëÊı¾İ
+// å‘ç®¡é“çš„å†™ç«¯å†™å…¥æ•°æ®
 static void
 send_request(struct socket_server *ss, struct request_package *request, char type, int len) {
 	request->header[6] = (uint8_t)type;
 	request->header[7] = (uint8_t)len;
 	for (;;) {
-		int n = write(ss->sendctrl_fd, &request->header[6], len+2); // Ïò¹ÜµÀµÄĞ´¶ËĞ´ÈëÊı¾İ
+		int n = write(ss->sendctrl_fd, &request->header[6], len+2); // å‘ç®¡é“çš„å†™ç«¯å†™å…¥æ•°æ®
 		if (n<0) {
 			if (errno != EINTR) {
 				fprintf(stderr, "socket-server : send ctrl command error %s.\n", strerror(errno));
@@ -830,7 +830,7 @@ open_request(struct socket_server *ss, struct request_package *req, uintptr_t op
 	return len;
 }
 
-// ·Ç×èÈûµÄÁ¬½Ó
+// éé˜»å¡çš„è¿æ¥
 int 
 socket_server_connect(struct socket_server *ss, uintptr_t opaque, const char * addr, int port) {
 	struct request_package request;
@@ -839,7 +839,7 @@ socket_server_connect(struct socket_server *ss, uintptr_t opaque, const char * a
 	return request.u.open.id;
 }
 
-// Ö±½Óµ÷ÓÃopen_socket ×èÈûÁ¬½Ó·şÎñÆ÷ ÕâÀï×èÈûÁ¬½Ó·şÎñÆ÷ºó »¹ÊÇ½»¸øepollÀ´¹ÜÀí¶ÁĞ´ ·Ç×èÈûµÄ¶ÁĞ´
+// ç›´æ¥è°ƒç”¨open_socket é˜»å¡è¿æ¥æœåŠ¡å™¨ è¿™é‡Œé˜»å¡è¿æ¥æœåŠ¡å™¨å è¿˜æ˜¯äº¤ç»™epollæ¥ç®¡ç†è¯»å†™ éé˜»å¡çš„è¯»å†™
 int 
 socket_server_block_connect(struct socket_server *ss, uintptr_t opaque, const char * addr, int port) {
 	struct request_package request;
@@ -885,7 +885,7 @@ socket_server_close(struct socket_server *ss, uintptr_t opaque, int id) {
 	send_request(ss, &request, 'K', sizeof(request.u.close));
 }
 
-// ´´½¨Ì×½Ó×Ö°ó¶¨¼àÌı
+// åˆ›å»ºå¥—æ¥å­—ç»‘å®šç›‘å¬
 static int
 do_listen(const char * host, int port, int backlog) {
 	// only support ipv4
@@ -899,7 +899,7 @@ do_listen(const char * host, int port, int backlog) {
 		return -1;
 	}
 	int reuse = 1;
-	// µØÖ·ÖØ¸´ÀûÓÃ
+	// åœ°å€é‡å¤åˆ©ç”¨
 	if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, (void *)&reuse, sizeof(int))==-1) {
 		goto _failed;
 	}
@@ -928,7 +928,7 @@ socket_server_listen(struct socket_server *ss, uintptr_t opaque, const char * ad
 		return -1;
 	}
 	struct request_package request;
-	int id = reserve_id(ss); // ´ÓÓ¦ÓÃ²ã·ÖÅäÒ»¸öid ´Ósocket³ØÖĞ
+	int id = reserve_id(ss); // ä»åº”ç”¨å±‚åˆ†é…ä¸€ä¸ªid ä»socketæ± ä¸­
 	request.u.listen.opaque = opaque;
 	request.u.listen.id = id;
 	request.u.listen.fd = fd;

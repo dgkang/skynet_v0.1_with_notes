@@ -1,4 +1,4 @@
-#include "skynet.h"
+ï»¿#include "skynet.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +9,7 @@ struct logger {
 	int close;
 };
 
-// skynetµÄÈÕÖ¾log·şÎñ
+// skynetçš„æ—¥å¿—logæœåŠ¡
 struct logger *
 logger_create(void) {
 	struct logger * inst = malloc(sizeof(*inst));
@@ -51,7 +51,7 @@ logger_init(struct logger * inst, struct skynet_context *ctx, const char * parm)
 	}
 	if (inst->handle) {
 		skynet_callback(ctx, inst, _logger);
-		skynet_command(ctx, "REG", ".logger"); // .xxx ¶¼ÊÇ±¾µØ·şÎñ
+		skynet_command(ctx, "REG", ".logger"); // .xxx éƒ½æ˜¯æœ¬åœ°æœåŠ¡
 		return 0;
 	}
 	return 1;

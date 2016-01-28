@@ -1,4 +1,4 @@
-#ifndef poll_socket_kqueue_h
+﻿#ifndef poll_socket_kqueue_h
 #define poll_socket_kqueue_h
 
 #include <netdb.h>

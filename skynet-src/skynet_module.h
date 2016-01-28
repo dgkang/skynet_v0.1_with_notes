@@ -1,4 +1,4 @@
-#ifndef SKYNET_MODULE_H
+ï»¿#ifndef SKYNET_MODULE_H
 #define SKYNET_MODULE_H
 
 struct skynet_context;
@@ -8,11 +8,11 @@ typedef int (*skynet_dl_init)(void * inst, struct skynet_context *, const char *
 typedef void (*skynet_dl_release)(void * inst);
 
 struct skynet_module {
-	const char * name;			// Ä£¿éÃû³Æ
-	void * module;				// ÓÃÓÚ±£´ædlopen·µ»ØµÄhandle
-	skynet_dl_create create;	// ÓÃÓÚ±£´æxxx_createº¯ÊıÈë¿ÚµØÖ·
-	skynet_dl_init init;		// ÓÃÓÚ±£´æxxx_initº¯ÊıÈë¿ÚµØÖ·
-	skynet_dl_release release;	// ÓÃÓÚ±£´æxxx_releaseº¯ÊıÈë¿ÚµØÖ·
+	const char * name;			// æ¨¡å—åç§°
+	void * module;				// ç”¨äºä¿å­˜dlopenè¿”å›çš„handle
+	skynet_dl_create create;	// ç”¨äºä¿å­˜xxx_createå‡½æ•°å…¥å£åœ°å€
+	skynet_dl_init init;		// ç”¨äºä¿å­˜xxx_initå‡½æ•°å…¥å£åœ°å€
+	skynet_dl_release release;	// ç”¨äºä¿å­˜xxx_releaseå‡½æ•°å…¥å£åœ°å€
 };
 
 void skynet_module_insert(struct skynet_module *mod);

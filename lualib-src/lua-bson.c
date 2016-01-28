@@ -1,4 +1,4 @@
-#include <lua.h>
+﻿#include <lua.h>
 #include <lauxlib.h>
 
 #include <time.h>
@@ -27,9 +27,9 @@ init_winsock() {
 
 #endif
 
-// bson��һ��������json�����ݽṹ ���� �α����� ������ ��Ч�Ե�����
-// �Ƚϸ�Ч��һ�����ݽṹ ���ǿռ������ʲ��Ǻܸ�Ч
-// bson��һ��ʵ�� mgdb�ڲ���ʹ����bson�洢���ݵ�
+// bson是一种类似于json的数据结构 具有 课遍历性 轻量性 高效性等特征
+// 比较高效的一种数据结构 但是空间利用率不是很高效
+// bson的一份实现 mgdb内部是使用了bson存储数据的
 
 #define DEFAULT_CAP 64
 #define MAX_NUMBER 1024
